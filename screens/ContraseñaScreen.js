@@ -1,12 +1,8 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
-export default function LoginScreen() {
-    
-  const navigation = useNavigation();
+export default function RegisterScreen(){
   return (
-    
       <ImageBackground
         source={require("../assets/Fondo.png")}
         style={styles.background}
@@ -18,39 +14,52 @@ export default function LoginScreen() {
         resizeMode="contain"
       />
       <View style={styles.card}>
+        <Text style={styles.TituloCard}>Recuperación de{"\n"}    Contraseña</Text>
 
-        <Text style={styles.textCard}>Correo Electrónico:</Text>
+        <Text style={styles.textCard}>Nombre de registro:</Text>
         <TextInput
-          placeholder="Email"
+          placeholder="Nombre"
           style={styles.input}
           placeholderTextColor="#999"
         />
 
-        <Text style={styles.textCard}>Contraseña:</Text>
+        <Text style={styles.textCard}>Correo de registro:</Text>
         <TextInput
-          placeholder="Contraseña"
+          placeholder="ejemplo@correo.com"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#999"
+        />
+
+        <Text style={styles.textCard}>Nueva contraseña:</Text>
+        <TextInput
+          placeholder="Nueva contraseña"
           secureTextEntry
           style={styles.input}
           placeholderTextColor="#999"
         />
 
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText} onPress={() =>navigation.navigate('Inicio')}>Iniciar Sesión</Text>
+          <Text style={styles.buttonText}>Definir Contraseña</Text>
         </TouchableOpacity>
 
-        <Text style={styles.link} onPress={() =>navigation.navigate('Contrasena')}>¿Olvidaste tu contraseña?</Text>
-
-        <Text style={styles.footerText}>
-          ¿Aún no tienes cuenta? <Text style={styles.link} onPress={() =>navigation.navigate('Register')}>Crea una</Text>
-        </Text>
       </View>
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
+  TituloCard:{
+    fontWeight: "bold",
+    fontSize: 20,
+    alignSelf:"center",
+    paddingBottom: 20,
+    paddingBlock: 5,
+    
+  },  
   textCard:{
     fontWeight:"bold",
-    marginBlock: 10,
+    marginBlock: 5,
   },
   background: {
   flex: 1,
@@ -93,7 +102,6 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    margin:9,
     width: 200,
     height:40,
     backgroundColor: "#92ad94",
@@ -101,7 +109,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     marginTop: 5,
-    alignSelf: "center",
+    alignSelf: "flex-end",
   },
 
   buttonText: {
@@ -110,13 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  footerText: {
-    marginTop: 15,
-    textAlign: "center",
-  },
-
   link: {
-    textAlign: "center",
     color: "#2f4f2f",
     fontWeight: "bold",
     textDecorationLine: "underline",
