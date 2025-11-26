@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
+import { ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function InicioScreen() {
@@ -11,7 +11,7 @@ export default function InicioScreen() {
         source={require("../assets/FondoPantallas.png")}
         style={styles.background}
         imageStyle={styles.backgroundImage}>
-
+    
     <View style={styles.Saludo}>
         <Image source={require("../assets/usuario.png")} style={styles.ImgSaludo}/>
         <Text style={styles.TextSaludo}>Buenos días Usuario!</Text>
@@ -24,28 +24,200 @@ export default function InicioScreen() {
         placeholderTextColor="#999"
         />
     </View>
+    <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
+    <View style={styles.contenido}>
         <View style={styles.Etiqueta}>
-            <Text style={styles.DesTitulo}>Desayunos</Text>
-            <View style={styles.ImgContenedor}>
-                <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                <View style={styles.info}>
-                    <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>100 Calorias</Text>
-                        <Text style={styles.detalles}>3 Per.</Text>
+            <View style={styles.TitulosEti}>
+                <Text style={styles.DesTitulo}>Desayunos</Text>
+                <Text style={styles.vermas}>Ver más</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View style={styles.ContHorizon}>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
                     </View>
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>100 Ing.</Text>
-                        <Text style={styles.detalles}>Fácil</Text>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
                     </View>
                 </View>
             </View>
+            </ScrollView>
         </View>
+
+
+        <View style={styles.Etiqueta}>
+            <View style={styles.TitulosEti}>
+                <Text style={styles.DesTitulo}>Comidas</Text>
+                <Text style={styles.vermas}>Ver más</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View style={styles.ContHorizon}>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
+            </ScrollView>
+        </View>
+
+
+        <View style={styles.Etiqueta}>
+            <View style={styles.TitulosEti}>
+                <Text style={styles.DesTitulo}>Cenas</Text>
+                <Text style={styles.vermas}>Ver más</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View style={styles.ContHorizon}>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.ImgContenedor}>
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                    <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
+            </ScrollView>
+        </View>
+
+
+    </View>
+    </ScrollView>
 
     </ImageBackground>
   );
 }
 const styles = StyleSheet.create({
+    ContHorizon:{
+        paddingRight:20,
+        width:"100%",
+        flexDirection:"row",
+    },
+    contenido:{
+        gap: 20,
+        flexDirection:"column",
+        height:"100%",
+        width:"100%",
+    },
+    vermas:{
+        textDecorationLine:"underline",
+        color: "white",
+        margin: 10,
+        fontSize:14,
+        marginBlock:6,
+    },
+    TitulosEti:{
+        justifyContent:"space-between",
+        width:"100%",
+        flexDirection:"row",
+    },
     ImgCon:{
         width:"100%"
     },
@@ -53,7 +225,6 @@ const styles = StyleSheet.create({
         width:"100%",
     },
     DesTitulo:{
-        fontFamily:"Roboto Slab",
         fontSize:20,
         fontWeight:"bold",
         paddingLeft:20,
@@ -64,7 +235,7 @@ const styles = StyleSheet.create({
         marginLeft:20,
         flexDirection:"column",
         backgroundColor:"#EDEDED",
-        width:"37%",
+        width:140,
         borderRadius:24,
     },
     info:{
