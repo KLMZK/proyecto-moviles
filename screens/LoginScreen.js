@@ -1,10 +1,30 @@
-import React from "react";
+import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function LoginScreen() {
-    
+  const [correo, setCorreo] = useState("");
+  const [password, setPassword] = useState("");
   const navigation = useNavigation();
+
+  function sesion() {
+    const login = {correo: correo, password: password}
+    
+    fetch("http://localhost/moviles/sesion.php",{
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(login)
+    })
+    .then(response => response.json())
+    .then(datos => {
+      if(datos.ingreso === 1) {
+        navigation.navigate('Inicio')
+      }
+    });
+  }
+
   return (
     
       <ImageBackground
@@ -21,6 +41,8 @@ export default function LoginScreen() {
 
         <Text style={styles.textCard}>Correo Electrónico:</Text>
         <TextInput
+          onChangeText={setCorreo}
+          value={correo}
           placeholder="Email"
           style={styles.input}
           placeholderTextColor="#999"
@@ -28,13 +50,15 @@ export default function LoginScreen() {
 
         <Text style={styles.textCard}>Contraseña:</Text>
         <TextInput
+          onChangeText={setPassword}
+          value={password}
           placeholder="Contraseña"
           secureTextEntry
           style={styles.input}
           placeholderTextColor="#999"
         />
 
-        <TouchableOpacity style={styles.button} onPress={() =>navigation.navigate('HomeTabs')}>
+        <TouchableOpacity style={styles.button} onPress={sesion}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
 
@@ -47,6 +71,7 @@ export default function LoginScreen() {
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
   textCard:{
     fontWeight:"bold",
