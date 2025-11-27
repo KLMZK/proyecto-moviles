@@ -1,55 +1,57 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
+import React, {useState} from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export default function RegisterScreen(){
+
+    const [correo, setCorreo] = useState("");
+    const [password, setContrasena] = useState("");
+    const [nombre, setNombre] = useState("");
+    const navigation = useNavigation();
+
+  function registro() {
+    const datos = {correo: correo.trim(), contrasena: password.trim(), nombre: nombre.trim()}
+    
+    fetch("http://192.168.1.6/moviles/registro.php",{
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(datos)
+    })
+    .then(response => response.json())
+    .then(datos => {
+      if(datos.estado === 1) {
+        alert("Cuenta Creada");
+        navigation.navigate('Login')
+      }
+    });
+  }
+
   return (
-      <ImageBackground
-        source={require("../assets/Fondo.png")}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
-      <Image
-        source={require("../assets/Logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+    <ImageBackground source={require("../assets/Fondo.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+      <Image source={require("../assets/Logo.png")} style={styles.logo} resizeMode="contain"/>
+      
       <View style={styles.card}>
         <Text style={styles.TituloCard}>Registrarse</Text>
-
         <Text style={styles.textCard}>Nombre:</Text>
-        <TextInput
-          placeholder="Nombre"
-          style={styles.input}
-          placeholderTextColor="#999"
-        />
-
+        <TextInput onChangeText={setNombre} value={nombre} placeholder="Nombre" style={styles.input} placeholderTextColor="#999"/>
         <Text style={styles.textCard}>Correo:</Text>
-        <TextInput
-          placeholder="ejemplo@correo.com"
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#999"
-        />
-
+        <TextInput onChangeText={setCorreo} value={correo} placeholder="ejemplo@correo.com" style={styles.input} placeholderTextColor="#999"/>
         <Text style={styles.textCard}>Contraseña:</Text>
-        <TextInput
-          placeholder="Contraseña"
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#999"
-        />
-
-        <TouchableOpacity style={styles.button}>
+        <TextInput onChangeText={setContrasena} value={password} placeholder="Contraseña" secureTextEntry style={styles.input} placeholderTextColor="#999" />
+        <TouchableOpacity style={styles.button} onPress={registro}>
           <Text style={styles.buttonText}>Crear Cuenta</Text>
         </TouchableOpacity>
-
       </View>
+      
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   TituloCard:{
+    fontWeight:"bold",
     fontSize: 20,
     alignSelf:"center",
     paddingBottom: 20,
@@ -57,6 +59,7 @@ const styles = StyleSheet.create({
     
   },  
   textCard:{
+    fontWeight:"bold",
     marginBlock: 5,
   },
   background: {

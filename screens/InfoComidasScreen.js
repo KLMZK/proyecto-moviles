@@ -18,10 +18,7 @@ const instrucciones = [
 ];
 
   return (
-        <ImageBackground
-            source={require("../assets/Group 1.png")}
-            style={styles.background}
-            imageStyle={styles.backgroundImage}>
+    <ImageBackground source={require("../assets/Group 1.png")} style={styles.background} imageStyle={styles.backgroundImage}>
         <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
         <View style={styles.ImgTitulo}>
             <View style={styles.ImgPrincipal}>

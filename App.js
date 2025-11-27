@@ -14,7 +14,7 @@ import RecetasScreen from "./screens/RecetasScreen";
 import IngredientesScreen from "./screens/IngredientesScreen";
 import PlanesScreen from "./screens/PlanesScreen";
 import PerfilScreen from "./screens/PerfilScreen";
-
+import FormRecetasScreen from "./screens/FormRecetasScreen";
 
 const Stack = createStackNavigator();
 const Tab=createBottomTabNavigator();
@@ -40,6 +40,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="InfoComidas" component={InfoComidasScreen} />
         <Stack.Screen name="HomeTabs" component={TabScreen} />
+        <Stack.Screen name="FormRecetas" component={FormRecetasScreen} />
       </Stack.Navigator>
     </NavigationContainer>
 

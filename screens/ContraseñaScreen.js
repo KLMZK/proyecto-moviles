@@ -1,7 +1,33 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
+import React, {useState} from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-export default function ContrasenaScreen(){
+export default function ContrasenaScreen(){  
+    const [correo, setCorreo] = useState("");
+    const [password, setContrasena] = useState("");
+    const [nombre, setNombre] = useState("");
+    const navigation = useNavigation();
+
+
+  function recover() {
+      const datos = {nombre: nombre.trim(), correo: correo.trim(), Ncontrasena: password.trim(), Val: 4}
+      
+      fetch("http://192.168.1.6/moviles/contrasena.php",{
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos)
+      })
+      .then(response => response.json())
+      .then(datos => {
+        if(datos.estado === 1) {
+          alert("Contraseña Cambiada");
+          navigation.navigate('Login')
+        }
+      });
+    }
+
   return (
       <ImageBackground
         source={require("../assets/Fondo.png")}
@@ -18,6 +44,8 @@ export default function ContrasenaScreen(){
 
         <Text style={styles.textCard}>Nombre de registro:</Text>
         <TextInput
+          onChangeText={setNombre}
+          value={nombre}
           placeholder="Nombre"
           style={styles.input}
           placeholderTextColor="#999"
@@ -25,21 +53,24 @@ export default function ContrasenaScreen(){
 
         <Text style={styles.textCard}>Correo de registro:</Text>
         <TextInput
+          onChangeText={setCorreo}
+          value={correo}
           placeholder="ejemplo@correo.com"
-          secureTextEntry
           style={styles.input}
           placeholderTextColor="#999"
         />
 
         <Text style={styles.textCard}>Nueva contraseña:</Text>
         <TextInput
+          onChangeText={setContrasena}
+          value={password}
           placeholder="Nueva contraseña"
           secureTextEntry
           style={styles.input}
           placeholderTextColor="#999"
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={recover}>
           <Text style={styles.buttonText}>Definir Contraseña</Text>
         </TouchableOpacity>
 

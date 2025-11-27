@@ -1,28 +1,40 @@
-import React from "react";
+import React, {useState,useEffect} from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function InicioScreen() {
+    const [nombre, setNombre] = useState("");
+    const navigation = useNavigation();
+
+    useEffect(() => {
+    async function cargarNombre() {
+      const nombreGuardado = await AsyncStorage.getItem("nombre");
+      if (nombreGuardado) {
+        setNombre(nombreGuardado);
+      }
+    }
+    cargarNombre();
+  }, []);
     
-  const navigation = useNavigation();
+  function saludoSegunHora() {
+  const hora = new Date().getHours();
+  if (hora < 12) return "Buenos días";
+  if (hora < 18) return "Buenas tardes";
+  return "Buenas noches";
+}
   return (
-    
-    <ImageBackground
-        source={require("../assets/FondoPantallas.png")}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}>
+    <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
     
     <View style={styles.Saludo}>
         <Image source={require("../assets/usuario.png")} style={styles.ImgSaludo}/>
-        <Text style={styles.TextSaludo}>Buenos días Usuario!</Text>
+        <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
+        <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}</Text>
     </View> 
     <View style={styles.InputContenedor}>
         <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
-        <TextInput
-        placeholder="Buscar"
-        style={styles.input}
-        placeholderTextColor="#999"
-        />
+        <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
     </View>
     <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
     <View style={styles.contenido}>
@@ -78,8 +90,6 @@ export default function InicioScreen() {
             </View>
             </ScrollView>
         </View>
-
-
         <View style={styles.Etiqueta}>
             <View style={styles.TitulosEti}>
                 <Text style={styles.DesTitulo}>Comidas</Text>
@@ -132,7 +142,6 @@ export default function InicioScreen() {
             </View>
             </ScrollView>
         </View>
-
         <View style={styles.Etiqueta}>
             <View style={styles.TitulosEti}>
                 <Text style={styles.DesTitulo}>Cenas</Text>
@@ -185,11 +194,9 @@ export default function InicioScreen() {
             </View>
             </ScrollView>
         </View>
-
-
     </View>
     </ScrollView>
-
+    
     </ImageBackground>
   );
 }
@@ -283,17 +290,17 @@ const styles = StyleSheet.create({
     Saludo: {
         marginBlock:10,
         width: "100%",
-        height:"10%",
+        height:"14%",
         alignItems:"center",
     },
     
     ImgSaludo: {
-        width: "80%",    
-        height: "80%",   
+        width: "70%",    
+        height: "70%",   
         resizeMode: "contain",
         position: "absolute",
         right:200,
-        bottom: 15,     
+        bottom: 30,     
     }, 
     
     background: {

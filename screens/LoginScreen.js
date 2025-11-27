@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [correo, setCorreo] = useState("");
@@ -8,9 +9,9 @@ export default function LoginScreen() {
   const navigation = useNavigation();
 
   function sesion() {
-    const login = {correo: correo, password: password}
+    const login = {correo: correo.trim(), password: password.trim()}
     
-    fetch("http://localhost/moviles/sesion.php",{
+    fetch("http://192.168.1.6/moviles/sesion.php",{
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
@@ -20,54 +21,47 @@ export default function LoginScreen() {
     .then(response => response.json())
     .then(datos => {
       if(datos.ingreso === 1) {
-        navigation.navigate('Inicio')
+       guardarUsuario(datos["0"].NOMBRE);
+       guardarCorreo(datos["0"].CORREO);
+        navigation.navigate('HomeTabs')
       }
     });
   }
+ 
+  async function guardarUsuario(nombre) {
+    try {
+      await AsyncStorage.setItem("nombre", nombre);
+    } catch (error) {
+      console.log("Error al guardar nombre", error);
+    }
+  }
+
+  async function guardarCorreo(correo) {
+    try {
+      await AsyncStorage.setItem("correo", correo);
+    } catch (error) {
+      console.log("Error al guardar el correo", error);
+    }
+  }
 
   return (
-    
-      <ImageBackground
-        source={require("../assets/Fondo.png")}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
-      <Image
-        source={require("../assets/Logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+    <ImageBackground source={require("../assets/Fondo.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+      <Image source={require("../assets/Logo.png")} style={styles.logo} resizeMode="contain"/>
+
       <View style={styles.card}>
-
         <Text style={styles.textCard}>Correo Electrónico:</Text>
-        <TextInput
-          onChangeText={setCorreo}
-          value={correo}
-          placeholder="Email"
-          style={styles.input}
-          placeholderTextColor="#999"
-        />
-
+        <TextInput onChangeText={setCorreo} value={correo} placeholder="Email" style={styles.input} placeholderTextColor="#999"/>
         <Text style={styles.textCard}>Contraseña:</Text>
-        <TextInput
-          onChangeText={setPassword}
-          value={password}
-          placeholder="Contraseña"
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#999"
-        />
-
+        <TextInput onChangeText={setPassword} value={password} placeholder="Contraseña" secureTextEntry style={styles.input} placeholderTextColor="#999"/>
         <TouchableOpacity style={styles.button} onPress={sesion}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
-
         <Text style={styles.link} onPress={() =>navigation.navigate('Contrasena')}>¿Olvidaste tu contraseña?</Text>
-
         <Text style={styles.footerText}>
           ¿Aún no tienes cuenta? <Text style={styles.link} onPress={() =>navigation.navigate('Register')}>Crea una</Text>
         </Text>
       </View>
+      
     </ImageBackground>
   );
 }
