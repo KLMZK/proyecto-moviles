@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
 
-export default function RegisterScreen(){
+export default function ContrasenaScreen(){
   return (
       <ImageBackground
         source={require("../assets/Fondo.png")}

@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
+import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function InicioScreen() {
@@ -33,7 +33,7 @@ export default function InicioScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.ContHorizon}>
-                <View style={styles.ImgContenedor}>
+                <TouchableOpacity style={styles.ImgContenedor}onPress={() => navigation.navigate("InfoComidas")} >
                     <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
                     <View style={styles.info}>
                         <Text style={styles.infoTitulo}>Hot Cakes</Text>
@@ -46,7 +46,7 @@ export default function InicioScreen() {
                             <Text style={styles.detalles}>Fácil</Text>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.ImgContenedor}>
                     <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
                     <View style={styles.info}>
@@ -132,7 +132,6 @@ export default function InicioScreen() {
             </View>
             </ScrollView>
         </View>
-
 
         <View style={styles.Etiqueta}>
             <View style={styles.TitulosEti}>
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
         color:"white",
         fontSize: 20,
         alignSelf:"center",
-        paddingBlock:30, 
+        paddingBlock:20, 
     }, 
     Saludo: {
         marginBlock:10,
@@ -289,12 +288,12 @@ const styles = StyleSheet.create({
     },
     
     ImgSaludo: {
-        width: "70%",    
-        height: "70%",   
+        width: "80%",    
+        height: "80%",   
         resizeMode: "contain",
         position: "absolute",
-        right:220,
-        bottom: 20,     
+        right:200,
+        bottom: 15,     
     }, 
     
     background: {
@@ -311,7 +310,7 @@ const styles = StyleSheet.create({
         height: "100%",   
         resizeMode: "contain",
         position: "absolute",
-        top: -70,        
+        top: -40,        
     },
     input: {
         width: "90%",

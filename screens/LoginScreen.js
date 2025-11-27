@@ -34,8 +34,8 @@ export default function LoginScreen() {
           placeholderTextColor="#999"
         />
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText} onPress={() =>navigation.navigate('Inicio')}>Iniciar Sesión</Text>
+        <TouchableOpacity style={styles.button} onPress={() =>navigation.navigate('HomeTabs')}>
+          <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
 
         <Text style={styles.link} onPress={() =>navigation.navigate('Contrasena')}>¿Olvidaste tu contraseña?</Text>
