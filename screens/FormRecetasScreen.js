@@ -1,11 +1,21 @@
 import React, { useState } from "react";
-import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, Platform, ImageBackground, Button } from "react-native";
+import { TouchableOpacity, View, Text, TextInput, Image, StyleSheet, ImageBackground, KeyboardAvoidingView, ScrollView, Platform , Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
 
 export default function FormRecetasScreen() {
   const [nombre, setNombre] = useState("");
+  const [ingrediente, setIngrediente] = useState("");
+  const [instrucciones, setInstrucciones] = useState("");
+  const [calorias, setCalorias] = useState("");
+  const [dificultad, setDificultad] = useState("");
+  const [personas, setPersonas] = useState("");
+  const [presupuesto, setPresupuesto] = useState("");
   const [cantidad, setCantidad] = useState("");
-  const [ingredientes, setIngredientes] = useState([]);
+  const [costo, setCosto] = useState("");
+  const [unidad, setUnidad] = useState("");
+  const [clasificacion, setClasificacion] = useState("");
+  const [ListIngr, setLisIngr] = useState([]);
   const [imageUri, setImageUri] = useState(null);
 
   const pickImage = async () => {
@@ -28,137 +38,150 @@ export default function FormRecetasScreen() {
   };
 
   const agregarIngrediente = () => {
-    if (!nombre.trim() || !cantidad.trim()) return;
-    setIngredientes([...ingredientes, { id: Date.now().toString(), nombre, cantidad }]);
-    setNombre("");
+    if (!ingrediente.trim() || !cantidad.trim()) return;
+    setLisIngr([...ListIngr, { id: Date.now().toString(), ingrediente, cantidad, costo, clasificacion,unidad }]);
+    setIngrediente("");
     setCantidad("");
+    setCosto("");
+    setClasificacion("");
+    setUnidad("");
   };
 
   const eliminarIngrediente = (id) => {
-    setIngredientes(ingredientes.filter(item => item.id !== id));
+    setLisIngr(ListIngr.filter(item => item.id !== id));
   };
 
+  function enviar() {
+    const formData = new FormData();
+    formData.append("nombre", nombre.trim());
+    formData.append("instrucciones", instrucciones.trim());
+    formData.append("ingrediente", JSON.stringify(ListIngr));
+    formData.append("calorias", calorias.trim());
+    formData.append("dificultad", dificultad.trim());
+    formData.append("personas", personas.trim());
+    formData.append("presupuesto", presupuesto.trim());
+    formData.append("imagen", {uri: imageUri, type: "image/jpeg", name: `foto_"${nombre}".jpg`});
+
+    fetch("http://192.168.1.6/moviles/FormRecetas.php",{
+      method: 'POST', 
+      headers: {},
+      body: formData
+    })
+    .then(response => response.json())
+    .then(datos => {
+      if(datos.ingreso === 1) {
+        navigation.navigate('Login');
+        Alert.alert("Exito","Receta guardada correctamente.")
+      } else {
+        Alert.alert("Error", "La receta no se ha guardado correctamente. Intentelo de nuevo")
+      }
+    });
+  }
+
   return (
-    <ImageBackground 
-      source={require("../assets/FondoPantallas.png")} 
-      style={styles.background} 
-      imageStyle={styles.backgroundImage}
-    >
-      <View style={styles.Saludo}>
-        <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo2}/>
-        <Text style={styles.TextSaludo}>Nueva</Text>
-        <Text style={[styles.TextSaludo, { paddingBlock: 0, top: 10 }]}>Receta</Text>
-        <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo}/>
-      </View>
-
-      <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
-        <View style={styles.Contenedor}>
-          <Text style={styles.TitInput}>Nombre:</Text>
-          <TextInput 
-            placeholder="Nombre de la receta" 
-            style={styles.input2} 
-            placeholderTextColor="#999" 
-          />
-
-          <Text style={styles.TitInput}>Instrucciones:</Text>
-          <TextInput 
-            placeholder="Instrucciones"
-            style={[styles.input2, { textAlignVertical: "top", height: 100 }]}
-            multiline
-            placeholderTextColor="#999"
-          />
-
-          <Text style={styles.TitInput}>Ingredientes:</Text>
-          <View style={styles.InputCon}>
-            <TextInput
-              placeholder="Ingrediente"
-              value={nombre}
-              onChangeText={setNombre}
-              style={styles.input3}
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              placeholder="Cantidad"
-              value={cantidad}
-              onChangeText={setCantidad}
-              style={styles.input3}
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity style={styles.btnMas} onPress={agregarIngrediente}>
-              <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
-            </TouchableOpacity>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+          <View style={styles.Saludo}>
+            <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo2}/>
+            <Text style={styles.TextSaludo}>Nueva</Text>
+            <Text style={[styles.TextSaludo, { paddingBlock: 0, top: 10 }]}>Receta</Text>
+            <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo}/>
           </View>
-
-          <Text style={styles.TitInput}>Ingredientes:</Text>
-          <View style={styles.ConLista}>
-            <ScrollView contentContainerStyle={{ paddingVertical: 5 }}>
-              {ingredientes.map(item => (
-                <TouchableOpacity key={item.id} onPress={() => eliminarIngrediente(item.id)}>
-                  <Text style={styles.item}>{item.nombre} — {item.cantidad}</Text>
+          <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
+            <View style={styles.Contenedor}>
+              <Text style={styles.TitInput}>Nombre:</Text>
+              <TextInput value={nombre} onChangeText={setNombre} placeholder="Nombre de la receta" style={styles.input2} placeholderTextColor="#999" />
+              <Text style={styles.TitInput}>Instrucciones:</Text>
+              <TextInput value={instrucciones} onChangeText={setInstrucciones} placeholder="Instrucciones" style={[styles.input2, { textAlignVertical: "top", height: 100 }]} multiline placeholderTextColor="#999"/>
+              <Text style={styles.TitInput}>Ingredientes:</Text>
+              <View style={{ flexDirection: "row", width: "100%", justifyContent: "center", alignItems: "center" }}>
+                <View style={{ flex: 1 }}>
+                  <View style={[styles.fila,{left:20,}]}>
+                    <TextInput placeholder="Ingrediente" value={ingrediente} onChangeText={setIngrediente} style={styles.inputInferior} placeholderTextColor="#999"/>
+                    <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={styles.inputInferior}>
+                      <Picker.Item label="Clasificacion" value="" />
+                      <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
+                      <Picker.Item label="Panadería y Pestelería" value="Panadería y Pestelería" />
+                      <Picker.Item label="Refrigerados" value="Refrigerados" />
+                      <Picker.Item label="Carnicería" value="Carnicería" />
+                      <Picker.Item label="Pescadería" value="Pescadería" />
+                      <Picker.Item label="Congelados" value="Congelados" />
+                      <Picker.Item label="Despensa / Secos (Abarrotes)" value="Despensa / Secos (Abarrotes)" />
+                      <Picker.Item label="Bebidas" value="Bebidas" />
+                      <Picker.Item label="Snacks y Dulces" value="Snacks y Dulces" />
+                    </Picker>
+                  </View>
+                  <View style={[styles.fila,{left:20,}]}>
+                    <TextInput placeholder="Cantidad" value={cantidad} onChangeText={setCantidad} style={styles.inputInferior} placeholderTextColor="#999"/>
+                    <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={styles.inputInferior}>
+                      <Picker.Item label="Unidad" value="" />
+                      <Picker.Item label="L" value="L" />
+                      <Picker.Item label="ml" value="ml" />
+                      <Picker.Item label="Kg" value="Tza" />
+                      <Picker.Item label="g" value="Carnicería" />
+                    </Picker>
+                    <TextInput placeholder="Costo unitario" value={costo} onChangeText={setCosto} style={styles.inputInferior} placeholderTextColor="#999"/>
+                  </View>
+                </View>
+                <TouchableOpacity style={{justifyContent: "center", alignItems: "center"}} onPress={agregarIngrediente}>
+                  <Image source={require("../assets/mas.png")} style={{ width: 28, height: 28 }} />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View style={{ alignItems: "center", marginTop: 20 }}>
-            {imageUri && (
-              <View style={styles.imageContainer}>
-                <Image source={{ uri: imageUri }} style={styles.image} />
               </View>
-            )}
-            <TouchableOpacity style={styles.boton} onPress={pickImage}>
-              <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.fila}>
-            <View style={styles.columna}>
-              <Text style={styles.TitInput}>Calorías:</Text>
-              <TextInput
-                placeholder="Calorías"
-                value={nombre}
-                onChangeText={setNombre}
-                style={styles.inputInferior}
-                placeholderTextColor="#999"
-              />
+              <Text style={styles.TitInput}>Lista ingredientes:</Text>
+              <View style={styles.ConLista}>
+                <ScrollView contentContainerStyle={{ paddingVertical: 5 }}>
+                  {ListIngr.map(item => (
+                    <TouchableOpacity key={item.id} onPress={() => eliminarIngrediente(item.id)}>
+                      <Text style={styles.item}>•{item.clasificacion}: {"\n"}-{item.ingrediente}------[{item.cantidad} {item.unidad}]____${item.costo*item.cantidad}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <View style={{ alignItems: "center", marginTop: 20 }}>
+                {imageUri && (
+                  <View style={styles.imageContainer}>
+                    <Image source={{ uri: imageUri }} style={styles.image} />
+                  </View>
+                )}
+                <TouchableOpacity style={styles.boton} onPress={pickImage}>
+                  <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.fila}>
+                <View style={styles.columna}>
+                  <Text style={styles.TitInput}>Calorías:</Text>
+                  <TextInput keyboardType="numeric" placeholder="Calorías" value={calorias} onChangeText={setCalorias} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
+                </View>
+                <View style={styles.columna}>
+                  <Text style={styles.TitInput}>Dificultad:</Text>
+                  <Picker selectedValue={dificultad} onValueChange={(itemValue) => setDificultad(itemValue)} style={[styles.inputInferior,{width:147}]}>
+                    <Picker.Item label="Dificultad" value="" />
+                    <Picker.Item label="Fácil" value="Fácil" />
+                    <Picker.Item label="Medio" value="Medio" />
+                    <Picker.Item label="Difícil" value="Difícil" />
+                    <Picker.Item label="Muy Difícil" value="Difícil" />
+                  </Picker>
+                </View>
+              </View>
+              <View style={styles.fila}>
+                <View style={styles.columna}>
+                  <Text style={styles.TitInput}>No. Personas:</Text>
+                  <TextInput keyboardType="numeric" placeholder="No. Personas" value={personas} onChangeText={setPersonas} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
+                </View>
+                <View style={styles.columna}>
+                  <Text style={styles.TitInput}>Presupuesto:</Text>
+                  <TextInput keyboardType="numeric" placeholder="Presupuesto" value={presupuesto} onChangeText={setPresupuesto} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
+                </View>
+              </View>
+              <TouchableOpacity style={[styles.boton,{top:10}]} onPress={enviar}>
+                <Text style={styles.textoBoton}>Guardar</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.columna}>
-              <Text style={styles.TitInput}>Dificultad:</Text>
-              <TextInput
-                placeholder="Dificultad"
-                value={cantidad}
-                onChangeText={setCantidad}
-                style={styles.inputInferior}
-                placeholderTextColor="#999"
-              />
-            </View>
-          </View>
-
-          <View style={styles.fila}>
-            <View style={styles.columna}>
-              <Text style={styles.TitInput}>No. Personas:</Text>
-              <TextInput
-                placeholder="No. Personas"
-                value={nombre}
-                onChangeText={setNombre}
-                style={styles.inputInferior}
-                placeholderTextColor="#999"
-              />
-            </View>
-            <View style={styles.columna}>
-              <Text style={styles.TitInput}>Presupuesto:</Text>
-              <TextInput
-                placeholder="Presupuesto"
-                value={cantidad}
-                onChangeText={setCantidad}
-                style={styles.inputInferior}
-                placeholderTextColor="#999"
-              />
-            </View>
-          </View>
-        </View>
+          </ScrollView>
+        </ImageBackground>
       </ScrollView>
-    </ImageBackground>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -192,7 +215,7 @@ const styles = StyleSheet.create({
     height: "100%",   
     resizeMode: "contain",
     position: "absolute",
-    top: -70,        
+    top:-162,        
   },
   Saludo: {
     bottom:30,
@@ -216,7 +239,7 @@ const styles = StyleSheet.create({
     height: "60%",   
     resizeMode: "contain",
     position: "absolute",
-    top:30,     
+    top:20,     
   }, 
   ImgSaludo: {
     width: "60%",    
@@ -224,7 +247,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     position: "absolute",
     right:240,
-    top:30,     
+    top:20,     
   }, 
   Contenedor:{
     borderRadius:40,
@@ -240,9 +263,16 @@ const styles = StyleSheet.create({
     left:20,
     alignSelf:"flex-start",
   },
-  InputCon:{
-    gap:10,
-    flexDirection:"row",
+  fila: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "90%",
+    marginTop: 10,
+    gap: 10,
+  },
+  columna: {
+    flex: 1,
+    alignItems: "flex-start",
   },
   input2: {
     width: "90%",
@@ -251,17 +281,16 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBlock: 10,
   },
-  input3: {
-    width:130,
-    height:46,
-    backgroundColor:"#D9D9D9",
-    left:10,
+  inputInferior: {
+    flex: 1,
+    height: 46,
+    backgroundColor: "#D9D9D9",
     padding: 12,
-    marginBlock: 10,
+    marginTop: 5,
   },
   btnMas: {
-    top:12,
     padding: 5,
+    marginTop: 10,
   },
   iconMas: {
     width: 30,
@@ -292,23 +321,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-  },
-  fila: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "90%",
-    marginTop: 10,
-    gap: 10,
-  },
-  columna: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  inputInferior: {
-    width: "100%",
-    height: 46,
-    backgroundColor: "#D9D9D9",
-    padding: 12,
-    marginTop: 5,
   },
 });

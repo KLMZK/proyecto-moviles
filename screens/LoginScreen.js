@@ -93,7 +93,7 @@ export default function LoginScreen() {
         </Text>
       </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
