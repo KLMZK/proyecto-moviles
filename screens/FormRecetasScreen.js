@@ -113,7 +113,7 @@ export default function FormRecetasScreen() {
                     </Picker>
                   </View>
                   <View style={[styles.fila,{left:20,}]}>
-                    <TextInput placeholder="Cantidad" value={cantidad} onChangeText={setCantidad} style={styles.inputInferior} placeholderTextColor="#999"/>
+                    <TextInput placeholder="Cantidad" value={cantidad} keyboardType={"decimal-pad"} onChangeText={setCantidad} style={styles.inputInferior} placeholderTextColor="#999"/>
                     <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={styles.inputInferior}>
                       <Picker.Item label="Unidad" value="" />
                       <Picker.Item label="L" value="L" />
@@ -121,7 +121,7 @@ export default function FormRecetasScreen() {
                       <Picker.Item label="Kg" value="Tza" />
                       <Picker.Item label="g" value="Carnicería" />
                     </Picker>
-                    <TextInput placeholder="Costo unitario" value={costo} onChangeText={setCosto} style={styles.inputInferior} placeholderTextColor="#999"/>
+                    <TextInput placeholder="Costo unitario" value={costo} keyboardType={"decimal-pad"} onChangeText={setCosto} style={styles.inputInferior} placeholderTextColor="#999"/>
                   </View>
                 </View>
                 <TouchableOpacity style={{justifyContent: "center", alignItems: "center"}} onPress={agregarIngrediente}>
@@ -151,7 +151,7 @@ export default function FormRecetasScreen() {
               <View style={styles.fila}>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>Calorías:</Text>
-                  <TextInput keyboardType="numeric" placeholder="Calorías" value={calorias} onChangeText={setCalorias} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
+                  <TextInput keyboardType={"decimal-pad"} placeholder="Calorías" value={calorias} onChangeText={setCalorias} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
                 </View>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>Dificultad:</Text>
@@ -171,7 +171,7 @@ export default function FormRecetasScreen() {
                 </View>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>Presupuesto:</Text>
-                  <TextInput keyboardType="numeric" placeholder="Presupuesto" value={presupuesto} onChangeText={setPresupuesto} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
+                  <TextInput keyboardType={"decimal-pad"} placeholder="Presupuesto" value={presupuesto} onChangeText={setPresupuesto} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
                 </View>
               </View>
               <TouchableOpacity style={[styles.boton,{top:10}]} onPress={enviar}>
