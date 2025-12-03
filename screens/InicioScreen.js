@@ -2,11 +2,16 @@ import React, {useState,useEffect} from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ip from './global'
 
 
 export default function InicioScreen() {
+    const direccion = ip();
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
+    const [desayunos, setDesayunos] = useState([]);
+    const [comidas, setComidas] = useState([]);
+    const [cenas, setCenas] = useState([]);
 
     useEffect(() => {
     async function cargarNombre() {
@@ -15,8 +20,19 @@ export default function InicioScreen() {
         setNombre(nombreGuardado);
       }
     }
+    async function consulta() {
+        fetch(`http:\\${direccion}\moviles\Select.php?des=0`)
+        .then(res => res.json)
+        .then(data => {
+            setDesayunos(data.desayunos);
+            setComidas(data.comidas);
+            setCenas(data.cenas);
+        })
+    }
     cargarNombre();
+    consulta();
   }, []);
+
     
   function saludoSegunHora() {
   const hora = new Date().getHours();
@@ -45,48 +61,32 @@ export default function InicioScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.ContHorizon}>
-                <TouchableOpacity style={styles.ImgContenedor}onPress={() => navigation.navigate("InfoComidas")} >
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                {desayunos.map((item) => (
+                <TouchableOpacity 
+                    key={item.id}
+                    style={styles.ImgContenedor}
+                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
+                >
+                    <Image 
+                    style={styles.ImgCon} 
+                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
+                    />
+
                     <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
+                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
+                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
+                    </View>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
+                        <Text style={styles.detalles}>{item.dificultad}</Text>
+                    </View>
                     </View>
                 </TouchableOpacity>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
-                    </View>
-                </View>
+                ))}
             </View>
             </ScrollView>
         </View>
@@ -97,48 +97,32 @@ export default function InicioScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.ContHorizon}>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                {comidas.map((item) => (
+                <TouchableOpacity 
+                    key={item.id}
+                    style={styles.ImgContenedor}
+                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
+                >
+                    <Image 
+                    style={styles.ImgCon} 
+                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
+                    />
+
                     <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
+                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
+                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
                     </View>
-                </View>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
+                        <Text style={styles.detalles}>{item.dificultad}</Text>
                     </View>
-                </View>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
                     </View>
-                </View>
+                </TouchableOpacity>
+                ))}
             </View>
             </ScrollView>
         </View>
@@ -149,48 +133,32 @@ export default function InicioScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.ContHorizon}>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
+                {cenas.map((item) => (
+                <TouchableOpacity 
+                    key={item.id}
+                    style={styles.ImgContenedor}
+                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
+                >
+                    <Image 
+                    style={styles.ImgCon} 
+                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
+                    />
+
                     <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
+                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
+                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
                     </View>
-                </View>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
+
+                    <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
+                        <Text style={styles.detalles}>{item.dificultad}</Text>
                     </View>
-                </View>
-                <View style={styles.ImgContenedor}>
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
                     </View>
-                </View>
+                </TouchableOpacity>
+                ))}
             </View>
             </ScrollView>
         </View>

@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from "react";
-import { TouchableOpacity, Alert, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
+import {  View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ip from "./global";
@@ -45,6 +45,8 @@ export default function PerfilScreen() {
       if(datos.estado === 1) {
         alert("Contraseña Cambiada");
         navigation.navigate('Login')
+       }else{
+        Alert.alert("Error","Contraseña incorrecta.Intentelo de nuevo.")
        }
     });
   }
@@ -96,62 +98,55 @@ export default function PerfilScreen() {
     .then(data => {
       if(data.estado === 1){
         AsyncStorage.clear();
-        alert("Cerrando sesión..");
+        Alert.alert("Cerrando","Cerrando sesión..");
         navigation.navigate("Login");
         }
       });
     }
   return (
-    <ImageBackground source={require("../assets/fondo2.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-      
-      <View style={styles.ConPer}> 
-
-        <View style={styles.ConDos}>
-          <Image style={styles.ImgPer} source={require("../assets/perfil.png")}/>
-          <Image style={[styles.Icon, { top: 110, right:60 }]} source={require("../assets/editar.png")}/>
-        </View>
-
-        <View style={styles.ConDos}>
-          <Text style={styles.TextPer} >{nombre}</Text>
-          <Image style={styles.Icon} source={require("../assets/editar.png")}/>
-        </View>
-        
-        <Text style={styles.TextPer2}>{correo}</Text>
-      </View>
-
-      <View style={styles.ConAba}>
-        <Text style={styles.TextPer}>Cambio de Contraseña:</Text>
-        <Text style={styles.TexInput}>Anterior contraseña:</Text>
-        <TextInput onChangeText={setContrasena} value={password} style={styles.input} secureTextEntry placeholder="Contraseña"/>
-        <Text style={styles.TexInput}>Nueva Contraseña:</Text>
-        <TextInput onChangeText={setNContrasena} value={Npassword} style={styles.input} secureTextEntry  placeholder="Nueva Contraseña"/>
-        <TouchableOpacity style={styles.button} onPress={recover}>
-          <Text style={styles.buttonText}>Cambiar</Text>
-        </TouchableOpacity>
-
-        <View style={styles.row}>
-          <TouchableOpacity onPress={confirmarBorrado}>
-
-            <View style={[styles.ConElec, {right:20, top:15}]}>
-              <Image style={[styles.Icon, { left:-10, width:30, height:30, bottom:10, }]} source={require("../assets/borrarcuenta.png")}/>
-              <Text style={{color:"white", fontSize:15, bottom:4,}}>Borrar Cuenta</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" >
+        <ImageBackground source={require("../assets/fondo2.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+          <View style={styles.ConPer}> 
+            <View style={styles.ConDos}>
+              <Image style={styles.ImgPer} source={require("../assets/perfil.png")}/>
+              <Image style={[styles.Icon, { top: 110, right:60 }]} source={require("../assets/editar.png")}/>
             </View>
-
-          </TouchableOpacity>
-          <TouchableOpacity onPress={cerrarSesion}>
-
-            <View style={[styles.ConElec, {left:20, top:15}]}>
-                <Image style={[styles.Icon, { left:-10, width:30, height:30, bottom:5,}]} source={require("../assets/cerrarsesion.png")}/>
-                <Text style={{color:"white", fontSize:15}}>Cerrar Sesión</Text>
+            <View style={styles.ConDos}>
+              <Text style={styles.TextPer}>{nombre}</Text>
+              <Image style={styles.Icon} source={require("../assets/editar.png")}/>
             </View>
+            <Text style={styles.TextPer2}>{correo}</Text>
+          </View>
+          <View style={styles.ConAba}>
+            <Text style={styles.TextPer}>Cambio de Contraseña:</Text>
+            <Text style={styles.TexInput}>Anterior contraseña:</Text>
+            <TextInput onChangeText={setContrasena} value={password} style={styles.input} secureTextEntry placeholder="Contraseña" />
+            <Text style={styles.TexInput}>Nueva Contraseña:</Text>
+            <TextInput onChangeText={setNContrasena} value={Npassword} style={styles.input} secureTextEntry placeholder="Nueva Contraseña"/>
+            <TouchableOpacity style={styles.button} onPress={recover}>
+              <Text style={styles.buttonText}>Cambiar</Text>
+            </TouchableOpacity>
+            <View style={styles.row}>
+              <TouchableOpacity onPress={confirmarBorrado}>
+                <View style={[styles.ConElec, {right:20, top:15}]}>
+                  <Image style={[styles.Icon, { left:-10, width:30, height:30, bottom:10 }]} source={require("../assets/borrarcuenta.png")}/>
+                  <Text style={{color:"white", fontSize:15, bottom:4}}>Borrar Cuenta</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={cerrarSesion}>
+                <View style={[styles.ConElec, {left:20, top:15}]}>
+                  <Image style={[styles.Icon, { left:-10, width:30, height:30, bottom:5 }]} source={require("../assets/cerrarsesion.png")}/>
+                  <Text style={{color:"white", fontSize:15}}>Cerrar Sesión</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ImageBackground>
+      </ScrollView>
+    </KeyboardAvoidingView>
+);
 
-          </TouchableOpacity>
-        </View>
-        
-      </View>
-
-    </ImageBackground>
-  );
 }
 const styles = StyleSheet.create({
   row:{
@@ -192,7 +187,7 @@ const styles = StyleSheet.create({
   ConAba:{
     alignItems:"center",
     flexDirection:"column",
-    height:"100%",
+    minHeight:340,
     width:"100%",
   },
   ConDos:{
@@ -224,7 +219,7 @@ const styles = StyleSheet.create({
     justifyContent:"flex-end",
     alignItems:"center",
     width:"100%",
-    height:"58%",
+    minHeight:470,
   },
   background: {
     flex: 1,

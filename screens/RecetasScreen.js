@@ -9,13 +9,11 @@ export default function RecetaScreen() {
   return (
     
     <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-    
     <View style={styles.Saludo}>
         <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo2}/>
         <Text style={styles.TextSaludo}>Recetas</Text>
         <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo}/>
     </View>
-
     <View style={styles.InputContenedor}>
       <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
       <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
@@ -23,40 +21,31 @@ export default function RecetaScreen() {
         <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
       </TouchableOpacity>
     </View>
-
       <View style={styles.Contenedor}>
-
         <View style={styles.ConHorizontal}>
-
           <View style={styles.ConImg}>
             <TouchableOpacity>
               <Image source={require("../assets/ImgPrueba2.png")} style={styles.ImgRecetas}/>
             </TouchableOpacity>
-
             <View style={styles.TextoTit}>
               <Text style={styles.TituCom}>Hot cakes </Text>
               <TouchableOpacity>
                 <Image source={require("../assets/editar.png")} style={styles.icon}/>
               </TouchableOpacity>
             </View>
-
           </View>
-
           <View style={styles.ConImg}>
             <TouchableOpacity>
               <Image source={require("../assets/ImgPrueba2.png")} style={styles.ImgRecetas}/>
             </TouchableOpacity>
-
             <View style={styles.TextoTit}>
               <Text style={styles.TituCom}>Hot cakes </Text>
               <TouchableOpacity>
                 <Image source={require("../assets/editar.png")} style={styles.icon}/>
               </TouchableOpacity>
             </View>
-            
           </View>
         </View>
-
       </View>
     </ImageBackground>
   );
