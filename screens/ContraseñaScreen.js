@@ -1,8 +1,10 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import ip from "./global";
 
 export default function ContrasenaScreen(){  
+    const direccion = ip();
     const [correo, setCorreo] = useState("");
     const [password, setContrasena] = useState("");
     const [nombre, setNombre] = useState("");
@@ -12,7 +14,7 @@ export default function ContrasenaScreen(){
   function recover() {
       const datos = {nombre: nombre.trim(), correo: correo.trim(), Ncontrasena: password.trim(), Val: 4}
       
-      fetch("http://192.168.1.6/moviles/contrasena.php",{
+      fetch(`http://${direccion}/moviles/contrasena.php`,{
         method: 'POST', 
         headers: {
           'Content-Type': 'application/json',

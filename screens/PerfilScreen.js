@@ -2,8 +2,10 @@ import React, {useState,useEffect} from "react";
 import { TouchableOpacity, Alert, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ip from "./global";
 
 export default function PerfilScreen() {
+  const direccion = ip();
   const [password, setContrasena] = useState("");
   const [Npassword, setNContrasena] = useState("");
   const [nombre, setNombre] = useState("");
@@ -33,7 +35,7 @@ export default function PerfilScreen() {
   function recover() {
     const datos = {Ncontrasena: Npassword.trim(), contrasena: password.trim(), correo:correo.trim(), Val: 1}
       
-    fetch("http://192.168.1.6/moviles/contrasena.php",{
+    fetch(`http://${direccion}/moviles/contrasena.php`,{
       method: 'POST', 
       headers: {'Content-Type': 'application/json',},
       body: JSON.stringify(datos)
@@ -65,7 +67,7 @@ export default function PerfilScreen() {
       correo: correo.trim(),
       nombre: nombre.trim()
     };
-    fetch("http://192.168.1.6/moviles/borrarCuenta.php", {
+    fetch(`http://${direccion}/moviles/borrarCuenta.php`, {
       method: "POST",
       headers: {"Content-Type": "application/json",},
       body: JSON.stringify(datos)
@@ -87,7 +89,7 @@ export default function PerfilScreen() {
     .catch(err => console.log(err));
   }
   function cerrarSesion() {
-    fetch("http://192.168.1.6/moviles/cerrarSesion.php", {
+    fetch(`http://${direccion}/moviles/cerrarSesion.php`, {
       method: "POST",
     })
     .then(res => res.json())

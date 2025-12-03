@@ -2,16 +2,20 @@ import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ip from './global';
 
 export default function LoginScreen() {
+  const direccion = ip();
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
+  const [errorCorreo, setErrorCorreo] = useState(false);
+  const [errorPassword, setErrorPassword] = useState(false);
 
   function sesion() {
     const login = {correo: correo.trim(), password: password.trim()}
     
-    fetch("http://192.168.1.6/moviles/sesion.php",{
+    fetch(`http://${direccion}/moviles/sesion.php`,{
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
@@ -20,10 +24,19 @@ export default function LoginScreen() {
     })
     .then(response => response.json())
     .then(datos => {
-      if(datos.ingreso === 1) {
-       guardarUsuario(datos["0"].NOMBRE);
-       guardarCorreo(datos["0"].CORREO);
-        navigation.navigate('HomeTabs')
+      if(datos.ingreso == 1) {
+        setErrorCorreo(false);
+        setErrorPassword(false);
+
+        guardarUsuario(datos["0"].NOMBRE);
+        guardarCorreo(datos["0"].CORREO);
+        navigation.navigate('HomeTabs');
+
+      } else {
+        setErrorCorreo(true);
+        setErrorPassword(true);
+
+        alert("Correo o contraseña incorrectos");
       }
     });
   }
@@ -50,9 +63,9 @@ export default function LoginScreen() {
 
       <View style={styles.card}>
         <Text style={styles.textCard}>Correo Electrónico:</Text>
-        <TextInput onChangeText={setCorreo} value={correo} placeholder="Email" style={styles.input} placeholderTextColor="#999"/>
+        <TextInput onChangeText={text => { setCorreo(text); setErrorCorreo(false);}} value={correo} placeholder="Email" style={errorCorreo ? styles.error : styles.input} placeholderTextColor="#999"/>
         <Text style={styles.textCard}>Contraseña:</Text>
-        <TextInput onChangeText={setPassword} value={password} placeholder="Contraseña" secureTextEntry style={styles.input} placeholderTextColor="#999"/>
+        <TextInput onChangeText={text => {setPassword(text);setErrorPassword(false); }} value={password} placeholder="Contraseña" secureTextEntry style={errorPassword ? styles.error : styles.input} placeholderTextColor="#999"/>        
         <TouchableOpacity style={styles.button} onPress={sesion}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
@@ -139,5 +152,13 @@ const styles = StyleSheet.create({
     color: "#2f4f2f",
     fontWeight: "bold",
     textDecorationLine: "underline",
+  },
+  error: {
+    width: "100%",
+    backgroundColor: "#f1f1f1",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    border: '3px solid red',
   },
 });

@@ -1,9 +1,10 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import ip from "./global";
 
 export default function RegisterScreen(){
-
+    const direccion = ip();
     const [correo, setCorreo] = useState("");
     const [password, setContrasena] = useState("");
     const [nombre, setNombre] = useState("");
@@ -12,7 +13,7 @@ export default function RegisterScreen(){
   function registro() {
     const datos = {correo: correo.trim(), contrasena: password.trim(), nombre: nombre.trim()}
     
-    fetch("http://192.168.1.6/moviles/registro.php",{
+    fetch(`http://${direccion}/moviles/registro.php`,{
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
