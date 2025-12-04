@@ -4,13 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import ip from "./global";
 
 export default function ContrasenaScreen(){  
-<<<<<<< HEAD
-    const direccion = ip();
-    const [correo, setCorreo] = useState("");
-    const [password, setContrasena] = useState("");
-    const [nombre, setNombre] = useState("");
-    const navigation = useNavigation();
-=======
   const [correo, setCorreo] = useState("");
   const [password, setContrasena] = useState("");
   const [nombre, setNombre] = useState("");
@@ -46,7 +39,6 @@ export default function ContrasenaScreen(){
           setErrorNombre("");
         }
   }
->>>>>>> 504e6fc3005a939dd5a599ad6701bf89dd280d43
 
 
   function recover() {

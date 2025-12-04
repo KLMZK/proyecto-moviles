@@ -48,21 +48,6 @@ export default function LoginScreen() {
     })
     .then(response => response.json())
     .then(datos => {
-<<<<<<< HEAD
-      if(datos.ingreso == 1) {
-        setErrorCorreo(false);
-        setErrorPassword(false);
-
-        guardarUsuario(datos["0"].NOMBRE);
-        guardarCorreo(datos["0"].CORREO);
-        navigation.navigate('HomeTabs');
-
-      } else {
-        setErrorCorreo(true);
-        setErrorPassword(true);
-
-        alert("Correo o contraseña incorrectos");
-=======
       if(datos.ingreso === 1) {
        guardarUsuario(datos["0"].NOMBRE);
        guardarCorreo(datos["0"].CORREO);
@@ -71,7 +56,6 @@ export default function LoginScreen() {
         seterror("Contraseña Incorrecta");
         setcerror("Correo Incorrecto");
         Alert.alert("Error", "Email o Contraseña incorrecto. Intentelo de nuevo")
->>>>>>> 504e6fc3005a939dd5a599ad6701bf89dd280d43
       }
     });
   };
@@ -99,17 +83,11 @@ export default function LoginScreen() {
       <Image source={require("../assets/Logo.png")} style={styles.logo} resizeMode="contain"/>
       <View style={styles.card}>
         <Text style={styles.textCard}>Correo Electrónico:</Text>
-<<<<<<< HEAD
-        <TextInput onChangeText={text => { setCorreo(text); setErrorCorreo(false);}} value={correo} placeholder="Email" style={errorCorreo ? styles.error : styles.input} placeholderTextColor="#999"/>
-        <Text style={styles.textCard}>Contraseña:</Text>
-        <TextInput onChangeText={text => {setPassword(text);setErrorPassword(false); }} value={password} placeholder="Contraseña" secureTextEntry style={errorPassword ? styles.error : styles.input} placeholderTextColor="#999"/>        
-=======
         <TextInput onChangeText={handleCorreoChange} value={correo} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} placeholder="Email" style={styles.input} placeholderTextColor="#999"/>
         {cerror ? ( <Text style={styles.errorText}>{cerror}</Text> ) : null}
         <Text style={styles.textCard}>Contraseña:</Text>
         <TextInput onChangeText={handlePasswordChange} value={password} placeholder="Contraseña" secureTextEntry={true} style={styles.input} placeholderTextColor="#999"/>
         {error ? ( <Text style={styles.errorText}>{error}</Text> ) : null}
->>>>>>> 504e6fc3005a939dd5a599ad6701bf89dd280d43
         <TouchableOpacity style={styles.button} onPress={sesion}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>

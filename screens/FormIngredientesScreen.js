@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { TouchableOpacity, View, Text, TextInput, Image, StyleSheet, ImageBackground, KeyboardAvoidingView, ScrollView, Platform , Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
+import ip from "./global";
 
 export default function FormIngredientesScreen() {
+    const direccion = ip();
     const [nombre, setNombre] = useState("");
     const [cantidad, setCantidad] = useState("");
     const [costo, setCosto] = useState("");
@@ -12,7 +14,7 @@ export default function FormIngredientesScreen() {
     function enviar() {
         const login = {nombre: nombre.trim(), cantidad: cantidad.trim(), costo: costo.trim(), clasificacion: clasificacion.trim()}
         
-        fetch("http://192.168.1.6/moviles/FormIngredientes.php",{
+        fetch('http://${direccion}/moviles/FormIngredientes.php',{
         method: 'POST', 
         headers: {
             'Content-Type': 'application/json',

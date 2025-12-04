@@ -11,31 +11,10 @@ export default function RegisterScreen(){
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
 
-<<<<<<< HEAD
-  function registro() {
-    const datos = {correo: correo.trim(), contrasena: password.trim(), nombre: nombre.trim()}
-    
-    fetch(`http://${direccion}/moviles/registro.php`,{
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(datos)
-    })
-    .then(response => response.json())
-    .then(datos => {
-      if(datos.estado === 1) {
-        alert("Cuenta Creada");
-        navigation.navigate('Login')
-      }
-    });
-  }
-=======
     const validarEmail = (email) => { 
         const regex = /\S+@\S+\.\S+/;
         return regex.test(email);
     };
->>>>>>> 504e6fc3005a939dd5a599ad6701bf89dd280d43
 
     const handleCorreoChange = (text) => {
         setCorreo(text);
@@ -74,7 +53,7 @@ export default function RegisterScreen(){
             nombre: nombre.trim()
         };
 
-        fetch("http://192.168.1.6/moviles/registro.php",{
+        fetch(`http://${direccion}/moviles/registro.php`,{
             method: 'POST', 
             headers: {
                 'Content-Type': 'application/json',
