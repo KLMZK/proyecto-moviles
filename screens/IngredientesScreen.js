@@ -103,8 +103,9 @@ export default function IngredientesScreen() {
                    {ingredients[category].map(item => (
                      <View key={item.nombre} style={[styles.Contenido, {alignItems:"center"}]}>
                        <Checkbox value={checks[item.nombre]} onValueChange={() => setChecks({ ...checks, [item.nombre]: !checks[item.nombre] })} color={checks[item.nombre] ? "#4CAF50" : undefined}/>
-                       <Text style={[styles.Text,{right:65}]}>{item.nombre}      {item.cantidad}</Text>
-                       <Text style={[styles.Text, {right: 10 }]}>${item.costo}</Text>
+                       <Text style={[styles.Text,{width:100, left:20}]}>{item.nombre}</Text>
+                       <Text style={[styles.Text,{width:80, left:40}]}>Qty: {item.cantidad}</Text>
+                       <Text style={[styles.Text,{width:80, left:50}]}>${item.costo}</Text>
                      </View>
                    ))}
                  </View>
@@ -131,7 +132,7 @@ export default function IngredientesScreen() {
    Contenido:{ 
      width:"100%", 
      flexDirection:"row", 
-     justifyContent:"space-between", 
+     justifyContent:"flex-start", 
      marginVertical: 5 
    }, 
    TextCla:{ 
