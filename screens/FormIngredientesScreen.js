@@ -61,7 +61,7 @@ export default function FormIngredientesScreen() {
                     <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={[styles.input2,{height:55}]}>
                         <Picker.Item label="Clasificación" value="" />
                         <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
-                        <Picker.Item label="Panadería y Pestelería" value="Panadería y Pestelería" />
+                        <Picker.Item label="Panadería y Pastelería" value="Panadería y Pastelería" />
                         <Picker.Item label="Refrigerados" value="Refrigerados" />
                         <Picker.Item label="Carnicería" value="Carnicería" />
                         <Picker.Item label="Pescadería" value="Pescadería" />
