@@ -25,9 +25,9 @@ export function TabScreen(){
   return(
     <Tab.Navigator screenOptions={{headerShown: false, tabBarActiveTintColor: "gray", tabBarInactiveTintColor: "black", tabBarStyle: { height: 80, backgroundColor: "#D9D9D9" },tabBar: (props) => <CustomTabBar />}}>
       <Tab.Screen name="Inicio" component={InicioScreen} options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/home.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
-      <Tab.Screen name="Recetas" component={RecetasScreen}  options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/Recetas.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
-      <Tab.Screen name="Ingredientes" component={IngredientesScreen} options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/Ingredientes.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
+      <Tab.Screen name="Favoritos" component={RecetasScreen}  options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/Recetas.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
       <Tab.Screen name="Planes" component={PlanesScreen} options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/Planes.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
+      <Tab.Screen name="Ingredientes" component={IngredientesScreen} options={{tabBarIcon: ({ focused, size }) => (<Image source={require("./assets/Ingredientes.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
       <Tab.Screen name="Perfil" component={PerfilScreen} options={{tabBarIcon: ({ focused, color, size }) => (<Image source={require("./assets/usuario1.png")}style={{width: size,height: size,tintColor: focused ? "gray" : "black",}}/>),}}/>
     </Tab.Navigator>
   );
