@@ -46,19 +46,17 @@ export default function RegisterScreen(){
             Alert.alert("Error", "La contraseña es obligatoria");
             return;
         }
-
-        const datos = {
-            correo: correo.trim(),
-            contrasena: password.trim(),
-            nombre: nombre.trim()
-        };
+        const imgUri = Image.resolveAssetSource(require("../assets/perfil.png")).uri;
+        const formData = new FormData();
+        formData.append("nombre", nombre.trim());
+        formData.append("correo", correo.trim());
+        formData.append("contrasena", password.trim());
+        formData.append("imagen", { uri: imgUri,type: "image/jpeg",name: `foto_${nombre}.jpg`});
 
         fetch(`http://${direccion}/moviles/registro.php`,{
-            method: 'POST', 
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(datos)
+          method: 'POST', 
+          headers: {},
+          body: formData
         })
         .then(response => response.json())
         .then(datos => {
