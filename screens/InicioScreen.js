@@ -2,85 +2,99 @@ import React, {useState,useEffect} from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ip from './global'
-
+import ip from './global';
 
 export default function InicioScreen() {
     const direccion = ip();
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
-    const [categoria, setCategoria]=useState([]);
+    const [categoria, setCategoria] = useState([]);
 
     useEffect(() => {
-    async function cargarNombre() {
-      const nombreGuardado = await AsyncStorage.getItem("nombre");
-      if (nombreGuardado) {
-        setNombre(nombreGuardado);
-      }
-    }
-    async function consulta() {
-        fetch(`http://${direccion}/moviles/Select.php`)
-        .then(res => res.json())
-        .then(data => {
-            setCategoria(data);
-        })
-    }
-    cargarNombre();
-    consulta();
-  },);
+        async function cargarNombre() {
+            const nombreGuardado = await AsyncStorage.getItem("nombre");
+            if (nombreGuardado) setNombre(nombreGuardado);
+        }
 
-  function saludoSegunHora() {
-  const hora = new Date().getHours();
-  if (hora < 12) return "Buenos días";
-  if (hora < 18) return "Buenas tardes";
-  return "Buenas noches";
-}
-  return (
-    <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-    
-    <View style={styles.Saludo}>
-        <Image source={require("../assets/usuario.png")} style={styles.ImgSaludo}/>
-        <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
-        <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}</Text>
-    </View> 
-    <View style={styles.InputContenedor}>
-        <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
-        <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
-    </View>
-    <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
-    <View style={styles.contenido}>
-        {categoria.map(cat =>(
-        <View key={cat.id} style={styles.Etiqueta}>
-            <View style={styles.TitulosEti}>
-                <Text style={styles.DesTitulo}>{cat.nombre}</Text>
-                <Text style={styles.vermas}>Ver más</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-            <View style={styles.ContHorizon}>
-                <TouchableOpacity style={styles.ImgContenedor}onPress={() => navigation.navigate("InfoComidas")} >
-                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
-                    <View style={styles.info}>
-                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Calorias</Text>
-                            <Text style={styles.detalles}>3 Per.</Text>
-                        </View>
-                        <View style={styles.infoContenido}>
-                            <Text style={styles.detalles}>100 Ing.</Text>
-                            <Text style={styles.detalles}>Fácil</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            </ScrollView>
+        async function consulta() {
+            fetch(`http://${direccion}/moviles/Select.php`)
+                .then(res => res.json())
+                .then(data => setCategoria(data))
+                .catch(err => console.log(err));
+        }
+
+        cargarNombre();
+        consulta();
+    }, []);
+
+    function saludoSegunHora() {
+        const hora = new Date().getHours();
+        if (hora < 12) return "Buenos días";
+        if (hora < 18) return "Buenas tardes";
+        return "Buenas noches";
+    }
+
+    return (
+        <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+        <View style={styles.Saludo}>
+            <Image source={require("../assets/usuario.png")} style={styles.ImgSaludo}/>
+            <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
+            <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}</Text>
         </View>
-        ))}
-    </View>
-    </ScrollView>
-    
-    </ImageBackground>
-  );
+        <View style={styles.InputContenedor}>
+            <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
+            <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
+            <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormRecetas')}>
+                <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
+            </TouchableOpacity>
+        </View>
+        <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
+            <View style={styles.contenido}>
+                {categoria.map(cat => (
+                    <View key={cat.id} style={styles.Etiqueta}>
+                        
+                        <View style={styles.TitulosEti}>
+                            <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
+                            <Text style={styles.vermas}>Ver más</Text>
+                        </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={styles.ContHorizon}>
+                                {cat.recetas.map(rec => (
+                                    <TouchableOpacity
+                                        key={rec.idReceta}
+                                        style={styles.ImgContenedor}
+                                        onPress={() => navigation.navigate("InfoComidas", { data: rec })}
+                                    >
+                                        <Image style={styles.ImgCon} source={{ uri: rec.imagen }}/>
+                                        <View style={styles.info}>
+                                            <Text style={styles.infoTitulo}>{rec.nombreRecetas}</Text>
+
+                                            <View style={styles.infoContenido}>
+                                                <Text style={styles.detalles}>{rec.calorias} Kcal</Text>
+                                                <Text style={styles.detalles}>{rec.tamano} Personas</Text>
+                                            </View>
+
+                                            <View style={styles.infoContenido}>
+                                                <Text style={styles.detalles}>{rec.ingredientes} Ing.</Text>
+                                                <Text style={styles.detalles}>{rec.dificultad}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+
+                            </View>
+                        </ScrollView>
+
+                    </View>
+                ))}
+
+            </View>
+        </ScrollView>
+
+        </ImageBackground>
+    );
 }
+
 const styles = StyleSheet.create({
     ContHorizon:{
         paddingRight:20,
@@ -158,6 +172,15 @@ const styles = StyleSheet.create({
         marginBlock:0,
         bottom:10
     },
+
+  btnMas: {
+    padding: 5,
+  },
+  iconMas: {
+    right:30,
+    width: 30,
+    height: 30,
+  },
 
     icon: {
         width: 20,
