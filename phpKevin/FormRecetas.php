@@ -23,7 +23,7 @@ $sql = "INSERT INTO recetas (CVE_RECETA, NOMBRE, DESCRIPCION, CALORIAS, DIFICULT
 
 if (mysqli_query($conexion, $sql)) {
     $idReceta = mysqli_insert_id($conexion);
-    mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta','$correo')");
+    mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta')");
 
     foreach ($ingrediente as $ing) {
         $nomIngr = $ing['ingrediente'];
@@ -52,8 +52,8 @@ if (!file_exists($upload_dir)) {
 $rutaImagen = "";  
 
 if (isset($_FILES["imagen"])) {
-
-    $nombre_archivo = $nombre."_" . $idReceta . ".jpg";
+    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $nombre);
+    $nombre_archivo = $nombre_limpio."_" . $idReceta . ".jpg";
     $guardar_en = $upload_dir . $nombre_archivo;
 
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {
