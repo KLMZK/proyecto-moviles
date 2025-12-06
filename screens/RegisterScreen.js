@@ -65,6 +65,8 @@ export default function RegisterScreen(){
             if(datos.estado === 1) {
                 Alert.alert("Cuenta Creada", "Tu cuenta fue creada correctamente");
                 navigation.navigate('Login');
+            } else {
+                Alert.alert("Error", "El correo ya está en uso");
             }
         })
         .catch(error => {
