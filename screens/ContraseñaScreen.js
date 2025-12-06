@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import ip from "./global";
 
 export default function ContrasenaScreen(){  
+  const direccion = ip();
   const [correo, setCorreo] = useState("");
   const [password, setContrasena] = useState("");
   const [nombre, setNombre] = useState("");

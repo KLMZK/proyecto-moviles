@@ -16,12 +16,9 @@ export default function RecetaScreen() {
         <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo}/>
     </View>
     <View style={styles.InputContenedor}>
-      <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
-      <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
-      <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormRecetas')}>
-        <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
-      </TouchableOpacity>
-    </View>
+            <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
+            <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
+        </View>
       <View style={styles.Contenedor}>
         <View style={styles.ConHorizontal}>
           <View style={styles.ConImg}>
