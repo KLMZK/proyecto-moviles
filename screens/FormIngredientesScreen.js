@@ -12,9 +12,9 @@ export default function FormIngredientesScreen() {
     const [unidad, setUnidad] = useState("");
       
     function enviar() {
-        const login = {nombre: nombre.trim(), cantidad: cantidad.trim(), costo: costo.trim(), clasificacion: clasificacion.trim()}
+        const login = {nombre: nombre.trim(), cantidad: cantidad.trim(), costo: costo.trim(), clasificacion: clasificacion.trim(), unidad: unidad.trim()}
         
-        fetch('http://${direccion}/moviles/FormIngredientes.php',{
+        fetch(`http://${direccion}/moviles/FormIngredientes.php`,{
         method: 'POST', 
         headers: {
             'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ export default function FormIngredientesScreen() {
         })
         .then(response => response.json())
         .then(datos => {
-        if(datos.ingreso === 1) {
+        if(datos.estado == 1) {
             Alert.alert("Guardado","Ingrediente guardado correctamente")
             navigation.navigate('Ingredientes');
         } else {
@@ -46,19 +46,19 @@ export default function FormIngredientesScreen() {
                     <Text style={styles.TitInput}>Nombre:</Text>
                     <TextInput value={nombre} onChangeText={setNombre} placeholder="Nombre del ingrediente" style={styles.input2} placeholderTextColor="#999" />
                     <Text style={styles.TitInput}>Unidad:</Text>
-                    <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={styles.input2}>
+                    <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={[styles.input2,{height:55}]}>
                       <Picker.Item label="Unidad" value="" />
                       <Picker.Item label="L" value="L" />
                       <Picker.Item label="ml" value="ml" />
-                      <Picker.Item label="Kg" value="Tza" />
-                      <Picker.Item label="g" value="Carnicería" />
+                      <Picker.Item label="Kg" value="Kg" />
+                      <Picker.Item label="g" value="g" />
                     </Picker>
                     <Text style={styles.TitInput}>Cantidad:</Text>
                     <TextInput value={cantidad} keyboardType={"decimal-pad"} onChangeText={setCantidad} placeholder="Cantidad del Ingrediente" style={styles.input2} placeholderTextColor="#999" />
                     <Text style={styles.TitInput}>Costo:</Text>
                     <TextInput value={costo} keyboardType={"decimal-pad"} onChangeText={setCosto} placeholder="Costo unitario del ingrediente" style={styles.input2} placeholderTextColor="#999" />
                     <Text style={styles.TitInput}>Clasificación:</Text>
-                    <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={styles.input2}>
+                    <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={[styles.input2,{height:55}]}>
                         <Picker.Item label="Clasificación" value="" />
                         <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
                         <Picker.Item label="Panadería y Pestelería" value="Panadería y Pestelería" />
@@ -81,6 +81,14 @@ export default function FormIngredientesScreen() {
 }
 
 const styles = StyleSheet.create({
+  inputInferior: {
+  flex: 1,
+  height: 55,
+  justifyContent: "center",
+  textAlign:"center",
+  fontSize: 18,
+  color: "black",
+},
   boton: {
     margin:9,
     width: 200,
@@ -103,11 +111,11 @@ const styles = StyleSheet.create({
         marginBottom:30 
   }, 
     input2: {
-        width: "90%",
-        height:50,
-        backgroundColor: "#D9D9D9",
-        padding: 12,
-        marginBlock: 10,
+      width: "90%",
+      height:50,
+      backgroundColor: "#D9D9D9",
+      padding: 12,
+      marginBlock: 10,
   },
     TitInput:{
         fontWeight:"bold",

@@ -16,16 +16,16 @@ $clasificacion = $input['clasificacion'] ?? '';
 $unidad = $input['unidad'] ?? '';
 
 if(empty($nombre) || empty($cantidad) || empty($costo) || empty($clasificacion) || empty($unidad)){
-    echo json_encode(['estado' => 0, 'mensaje' => 'Faltan datos']);
+    echo json_encode(['estado' => 0]);
     exit;
 }
 
-mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE,NOMBRE,CANTIDAD,CLASIFICACION,UNIDAD) VALUES ('','$nombre','$cantidad','$costo','$clasificacion','$unidad')");
+$stmt2 = $conexion->prepare("INSERT INTO ingredientes (CVE_INGREDIENTE,NOMBRE,CANTIDAD,COSTO,CLASIFICACION,UNIDAD) VALUES ('','$nombre','$cantidad','$costo','$clasificacion','$unidad')");
 
 if($stmt2->execute()){
-    echo json_encode(['estado' => 1, 'mensaje' => 'Cuenta creada correctamente']);
+    echo json_encode(['estado' => 1]);
 } else {
-    echo json_encode(['estado' => 0, 'mensaje' => 'Error al crear la cuenta']);
+    echo json_encode(['estado' => 0]);
 }
 
 $conexion->close();

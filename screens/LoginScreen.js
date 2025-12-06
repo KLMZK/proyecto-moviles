@@ -11,8 +11,6 @@ export default function LoginScreen() {
   const [cerror, setcerror]=useState("");
   const [error, seterror]=useState("");
   const navigation = useNavigation();
-  const [errorCorreo, setErrorCorreo] = useState(false);
-  const [errorPassword, setErrorPassword] = useState(false);
 
   const validarEmail = (email) => { 
     const regex = /\S+@\S+\.\S+/;

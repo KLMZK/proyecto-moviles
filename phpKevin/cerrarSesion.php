@@ -8,8 +8,5 @@ session_start();
 session_unset(); 
 session_destroy(); 
 
-echo json_encode([
-    'estado' => 1,
-    'mensaje' => 'Sesión cerrada correctamente'
-]);
+echo json_encode(['estado' => 1,]);
 ?>

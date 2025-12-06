@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { TouchableOpacity, View, Text, TextInput, Image, StyleSheet, ImageBackground, KeyboardAvoidingView, ScrollView, Platform , Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
+import ip from './global';
+import { set } from "date-fns";
 
 export default function FormRecetasScreen() {
+  const direccion = ip();
   const [nombre, setNombre] = useState("");
   const [ingrediente, setIngrediente] = useState("");
   const [instrucciones, setInstrucciones] = useState("");
@@ -14,6 +17,7 @@ export default function FormRecetasScreen() {
   const [cantidad, setCantidad] = useState("");
   const [costo, setCosto] = useState("");
   const [unidad, setUnidad] = useState("");
+  const [clas, setClas] = useState("");
   const [clasificacion, setClasificacion] = useState("");
   const [ListIngr, setLisIngr] = useState([]);
   const [imageUri, setImageUri] = useState(null);
@@ -54,6 +58,7 @@ export default function FormRecetasScreen() {
   function enviar() {
     const formData = new FormData();
     formData.append("nombre", nombre.trim());
+     formData.append("clas", clas.trim());
     formData.append("instrucciones", instrucciones.trim());
     formData.append("ingrediente", JSON.stringify(ListIngr));
     formData.append("calorias", calorias.trim());
@@ -62,20 +67,29 @@ export default function FormRecetasScreen() {
     formData.append("presupuesto", presupuesto.trim());
     formData.append("imagen", {uri: imageUri, type: "image/jpeg", name: `foto_"${nombre}".jpg`});
 
-    fetch("http://192.168.1.6/moviles/FormRecetas.php",{
+    fetch(`http://${direccion}/moviles/FormRecetas.php`,{
       method: 'POST', 
       headers: {},
       body: formData
     })
     .then(response => response.json())
     .then(datos => {
-      if(datos.ingreso === 1) {
+      if(datos.ingreso == 1) {
         navigation.navigate('Login');
         Alert.alert("Exito","Receta guardada correctamente.")
       } else {
         Alert.alert("Error", "La receta no se ha guardado correctamente. Intentelo de nuevo")
       }
     });
+    setLisIngr([]);
+    setNombre("");
+    setInstrucciones("");
+    setCalorias("");
+    setDificultad("");
+    setPersonas("");
+    setPresupuesto("");
+    setImageUri("");
+    setClas("");
   }
 
   return (
@@ -92,6 +106,16 @@ export default function FormRecetasScreen() {
             <View style={styles.Contenedor}>
               <Text style={styles.TitInput}>Nombre:</Text>
               <TextInput value={nombre} onChangeText={setNombre} placeholder="Nombre de la receta" style={styles.input2} placeholderTextColor="#999" />
+              <Text style={styles.TitInput}>Clasificación de la receta:</Text>
+              <Picker selectedValue={clas} onValueChange={(itemValue) => setClas(itemValue)} style={[styles.input2]}>
+                <Picker.Item label="Seleccionar" value="" />
+                <Picker.Item label="Desayuno" value="1" />
+                <Picker.Item label="Comida" value="2" />
+                <Picker.Item label="Cena" value="3" />
+                <Picker.Item label="Bebidas" value="4" />
+                <Picker.Item label="Postres" value="5" />
+                <Picker.Item label="Snacks" value="6" />
+              </Picker>
               <Text style={styles.TitInput}>Instrucciones:</Text>
               <TextInput value={instrucciones} onChangeText={setInstrucciones} placeholder="Instrucciones" style={[styles.input2, { textAlignVertical: "top", height: 100 }]} multiline placeholderTextColor="#999"/>
               <Text style={styles.TitInput}>Ingredientes:</Text>
@@ -100,7 +124,7 @@ export default function FormRecetasScreen() {
                   <View style={[styles.fila,{left:20,}]}>
                     <TextInput placeholder="Ingrediente" value={ingrediente} onChangeText={setIngrediente} style={styles.inputInferior} placeholderTextColor="#999"/>
                     <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={styles.inputInferior}>
-                      <Picker.Item label="Clasificacion" value="" />
+                      <Picker.Item label="Clasif" value="" />
                       <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
                       <Picker.Item label="Panadería y Pestelería" value="Panadería y Pestelería" />
                       <Picker.Item label="Refrigerados" value="Refrigerados" />
@@ -115,11 +139,12 @@ export default function FormRecetasScreen() {
                   <View style={[styles.fila,{left:20,}]}>
                     <TextInput placeholder="Cantidad" value={cantidad} keyboardType={"decimal-pad"} onChangeText={setCantidad} style={styles.inputInferior} placeholderTextColor="#999"/>
                     <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={styles.inputInferior}>
-                      <Picker.Item label="Unidad" value="" />
+                      <Picker.Item label="U" value="" />
                       <Picker.Item label="L" value="L" />
                       <Picker.Item label="ml" value="ml" />
-                      <Picker.Item label="Kg" value="Tza" />
-                      <Picker.Item label="g" value="Carnicería" />
+                      <Picker.Item label="Kg" value="Kg" />
+                      <Picker.Item label="g" value="g" />
+                      <Picker.Item label="Pieza" value="pzas" />
                     </Picker>
                     <TextInput placeholder="Costo unitario" value={costo} keyboardType={"decimal-pad"} onChangeText={setCosto} style={styles.inputInferior} placeholderTextColor="#999"/>
                   </View>
@@ -133,7 +158,7 @@ export default function FormRecetasScreen() {
                 <ScrollView contentContainerStyle={{ paddingVertical: 5 }}>
                   {ListIngr.map(item => (
                     <TouchableOpacity key={item.id} onPress={() => eliminarIngrediente(item.id)}>
-                      <Text style={styles.item}>•{item.clasificacion}: {"\n"}-{item.ingrediente}------[{item.cantidad} {item.unidad}]____${item.costo*item.cantidad}</Text>
+                      <Text style={styles.item}>•{item.clasificacion}: {"\n"}-{item.ingrediente}--[{item.cantidad} {item.unidad}]{"-->"}${item.costo*item.cantidad}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -215,13 +240,12 @@ const styles = StyleSheet.create({
     height: "100%",   
     resizeMode: "contain",
     position: "absolute",
-    top:-162,        
+    top:-225,        
   },
   Saludo: {
     bottom:30,
-    marginBlock:10,
     width: "100%",
-    height:"14%",
+    height:"11%",
     alignItems:"center",
   },
   TextSaludo: {
@@ -235,19 +259,19 @@ const styles = StyleSheet.create({
   ImgSaludo2: {
     alignSelf:"flex-end",
     left:240,
-    width: "60%",    
-    height: "60%",   
+    width: "55%",    
+    height: "55%",   
     resizeMode: "contain",
     position: "absolute",
-    top:20,     
+    top:40,       
   }, 
   ImgSaludo: {
-    width: "60%",    
-    height: "60%",   
+    width: "55%",    
+    height: "55%",   
     resizeMode: "contain",
     position: "absolute",
     right:240,
-    top:20,     
+    top:40,      
   }, 
   Contenedor:{
     borderRadius:40,
@@ -283,18 +307,10 @@ const styles = StyleSheet.create({
   },
   inputInferior: {
     flex: 1,
-    height: 46,
+    height: 55,
     backgroundColor: "#D9D9D9",
     padding: 12,
     marginTop: 5,
-  },
-  btnMas: {
-    padding: 5,
-    marginTop: 10,
-  },
-  iconMas: {
-    width: 30,
-    height: 30,
   },
   ConLista:{
     borderColor:"gray",
@@ -323,3 +339,4 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 });
+

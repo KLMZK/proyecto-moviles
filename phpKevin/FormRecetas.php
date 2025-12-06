@@ -8,6 +8,7 @@ session_start();
 include("conexion.php");
 
 $nombre =$_POST['nombre'] ?? '';
+$clas =$_POST['clas'] ?? '';
 $instrucciones = $_POST['instrucciones'] ?? '';
 $ingrediente = json_decode($_POST['ingrediente'] ?? '[]', true);
 $calorias = $_POST['calorias'] ?? '';
@@ -22,6 +23,7 @@ $sql = "INSERT INTO recetas (CVE_RECETA, NOMBRE, DESCRIPCION, CALORIAS, DIFICULT
 
 if (mysqli_query($conexion, $sql)) {
     $idReceta = mysqli_insert_id($conexion);
+    mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta','$correo')");
 
     foreach ($ingrediente as $ing) {
         $nomIngr = $ing['ingrediente'];
@@ -38,7 +40,7 @@ if (mysqli_query($conexion, $sql)) {
 
     echo json_encode(["ingreso" => 1]);
 } else {
-    echo json_encode(["ingreso" => 0, "error" => "Error en la base de datos"]);
+    echo json_encode(["ingreso" => 0]);
 }
 
 $upload_dir = "uploads/";
@@ -55,6 +57,7 @@ if (isset($_FILES["imagen"])) {
     $guardar_en = $upload_dir . $nombre_archivo;
 
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {
+        chmod($guardar_en, 0644);
         $rutaImagen = $guardar_en;
     }
 }

@@ -12,6 +12,7 @@ export default function RecetaScreen() {
     <View style={styles.Saludo}>
         <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo2}/>
         <Text style={styles.TextSaludo}>Recetas</Text>
+        <Text style={[styles.TextSaludo,{paddingBlock:0, top:10}]}>Guardadas</Text>
         <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo}/>
     </View>
     <View style={styles.InputContenedor}>

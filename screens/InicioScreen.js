@@ -9,9 +9,7 @@ export default function InicioScreen() {
     const direccion = ip();
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
-    const [desayunos, setDesayunos] = useState([]);
-    const [comidas, setComidas] = useState([]);
-    const [cenas, setCenas] = useState([]);
+    const [categoria, setCategoria]=useState([]);
 
     useEffect(() => {
     async function cargarNombre() {
@@ -21,19 +19,16 @@ export default function InicioScreen() {
       }
     }
     async function consulta() {
-        fetch(`http:\\${direccion}\moviles\Select.php?des=0`)
-        .then(res => res.json)
+        fetch(`http://${direccion}/moviles/Select.php`)
+        .then(res => res.json())
         .then(data => {
-            setDesayunos(data.desayunos);
-            setComidas(data.comidas);
-            setCenas(data.cenas);
+            setCategoria(data);
         })
     }
     cargarNombre();
     consulta();
-  }, []);
+  },);
 
-    
   function saludoSegunHora() {
   const hora = new Date().getHours();
   if (hora < 12) return "Buenos días";
@@ -54,114 +49,32 @@ export default function InicioScreen() {
     </View>
     <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
     <View style={styles.contenido}>
-        <View style={styles.Etiqueta}>
+        {categoria.map(cat =>(
+        <View key={cat.id} style={styles.Etiqueta}>
             <View style={styles.TitulosEti}>
-                <Text style={styles.DesTitulo}>Desayunos</Text>
+                <Text style={styles.DesTitulo}>{cat.nombre}</Text>
                 <Text style={styles.vermas}>Ver más</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.ContHorizon}>
-                {desayunos.map((item) => (
-                <TouchableOpacity 
-                    key={item.id}
-                    style={styles.ImgContenedor}
-                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
-                >
-                    <Image 
-                    style={styles.ImgCon} 
-                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
-                    />
-
+                <TouchableOpacity style={styles.ImgContenedor}onPress={() => navigation.navigate("InfoComidas")} >
+                    <Image style={styles.ImgCon}source={require("../assets/ImgPrueba.png")}/>
                     <View style={styles.info}>
-                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
-                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
-                    </View>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
-                        <Text style={styles.detalles}>{item.dificultad}</Text>
-                    </View>
+                        <Text style={styles.infoTitulo}>Hot Cakes</Text>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Calorias</Text>
+                            <Text style={styles.detalles}>3 Per.</Text>
+                        </View>
+                        <View style={styles.infoContenido}>
+                            <Text style={styles.detalles}>100 Ing.</Text>
+                            <Text style={styles.detalles}>Fácil</Text>
+                        </View>
                     </View>
                 </TouchableOpacity>
-                ))}
             </View>
             </ScrollView>
         </View>
-        <View style={styles.Etiqueta}>
-            <View style={styles.TitulosEti}>
-                <Text style={styles.DesTitulo}>Comidas</Text>
-                <Text style={styles.vermas}>Ver más</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-            <View style={styles.ContHorizon}>
-                {comidas.map((item) => (
-                <TouchableOpacity 
-                    key={item.id}
-                    style={styles.ImgContenedor}
-                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
-                >
-                    <Image 
-                    style={styles.ImgCon} 
-                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
-                    />
-
-                    <View style={styles.info}>
-                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
-                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
-                    </View>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
-                        <Text style={styles.detalles}>{item.dificultad}</Text>
-                    </View>
-                    </View>
-                </TouchableOpacity>
-                ))}
-            </View>
-            </ScrollView>
-        </View>
-        <View style={styles.Etiqueta}>
-            <View style={styles.TitulosEti}>
-                <Text style={styles.DesTitulo}>Cenas</Text>
-                <Text style={styles.vermas}>Ver más</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-            <View style={styles.ContHorizon}>
-                {cenas.map((item) => (
-                <TouchableOpacity 
-                    key={item.id}
-                    style={styles.ImgContenedor}
-                    onPress={() => navigation.navigate("InfoComidas", { receta: item })}
-                >
-                    <Image 
-                    style={styles.ImgCon} 
-                    source={{ uri: `http://${direccion}/imagenes/${item.imagen}` }}
-                    />
-
-                    <View style={styles.info}>
-                    <Text style={styles.infoTitulo}>{item.nombre}</Text>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.calorias} Calorias</Text>
-                        <Text style={styles.detalles}>{item.porciones} Per.</Text>
-                    </View>
-
-                    <View style={styles.infoContenido}>
-                        <Text style={styles.detalles}>{item.ingredientes} Ing.</Text>
-                        <Text style={styles.detalles}>{item.dificultad}</Text>
-                    </View>
-                    </View>
-                </TouchableOpacity>
-                ))}
-            </View>
-            </ScrollView>
-        </View>
+        ))}
     </View>
     </ScrollView>
     
@@ -175,6 +88,7 @@ const styles = StyleSheet.create({
         flexDirection:"row",
     },
     contenido:{
+        bottom:-15,
         gap: 20,
         flexDirection:"column",
         height:"100%",
@@ -209,7 +123,7 @@ const styles = StyleSheet.create({
         marginLeft:20,
         flexDirection:"column",
         backgroundColor:"#EDEDED",
-        width:140,
+        width:160,
         borderRadius:24,
     },
     info:{
@@ -241,7 +155,8 @@ const styles = StyleSheet.create({
         height:50,
         backgroundColor: "#f1f1f1",
         borderRadius: 20,
-        marginBlock: 40,
+        marginBlock:0,
+        bottom:10
     },
 
     icon: {

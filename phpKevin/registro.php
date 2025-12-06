@@ -21,9 +21,9 @@ if(empty($correo) || empty($nombre) || empty($contrasena)){
 $stmt2 = $conexion->prepare("INSERT INTO usuarios (NOMBRE, PASSWORD, CORREO) VALUES ('$nombre','$contrasena','$correo')");
 
 if($stmt2->execute()){
-    echo json_encode(['estado' => 1, 'mensaje' => 'Cuenta creada correctamente']);
+    echo json_encode(['estado' => 1]);
 } else {
-    echo json_encode(['estado' => 0, 'mensaje' => 'Error al crear la cuenta']);
+    echo json_encode(['estado' => 0]);
 }
 
 $conexion->close();
