@@ -9,8 +9,7 @@ export default function InicioScreen() {
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
     const [categoria, setCategoria] = useState([]);
-      const [correo, setCorreo] = useState("");
-      const[id, setID]=useState("");
+    const[id, setID]=useState("");
 
 
     useFocusEffect(
@@ -19,10 +18,6 @@ export default function InicioScreen() {
             const nombreGuardado = await AsyncStorage.getItem("nombre");
             if (nombreGuardado) setNombre(nombreGuardado);
         }
-        async function cargarCorreo() {
-            const correoGuardado = await AsyncStorage.getItem("correo");
-            if (correoGuardado) setCorreo(correoGuardado);
-            }
         async function cargarID() {
             const IDGuardado = await AsyncStorage.getItem("id");
             if (IDGuardado) setID(IDGuardado);
@@ -35,7 +30,6 @@ export default function InicioScreen() {
                 .then(data => setCategoria(data))
                 .catch(err => console.log(err));
         }
-        cargarCorreo();
         cargarID();
         cargarNombre();
         consulta();
@@ -73,7 +67,7 @@ export default function InicioScreen() {
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             <View style={styles.ContHorizon}>
                                 {cat.recetas.map(rec => (
-                                    <TouchableOpacity key={rec.idReceta} style={styles.ImgContenedor} onPress={() => navigation.navigate("InfoComidas", { data: rec })}>
+                                    <TouchableOpacity key={rec.idReceta} style={styles.ImgContenedor} onPress={() => navigation.navigate("InfoComidas", { cve: rec.idReceta })}>
                                         <Image style={{width: 160, height: 130, borderRadius: 20}} source={{ uri:rec.imagen}}/>
                                         <View style={styles.info}>
                                             <Text style={styles.infoTitulo}>{rec.nombreRecetas}</Text>
