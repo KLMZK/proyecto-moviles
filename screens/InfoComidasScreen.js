@@ -1,31 +1,35 @@
-import React from "react";
+import { useRoute } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
 import {  View, Text,FlatList , Image, StyleSheet, ImageBackground,ScrollView } from "react-native";
+import ip from './global';
 
 export default function InfoComidasScreen() {
-    const comidas = [
-  { id: "1", nombre: "Hot Cakes" },
-  { id: "2", nombre: "Huevos" },
-  { id: "3", nombre: "Tostadas" },
-  { id: "4", nombre: "Hot Cakes" },
-  { id: "5", nombre: "Huevos" },
-  { id: "6", nombre: "Tostadas" },
-];
-const instrucciones = [
-  { id: "1", paso: "Mezclar la harina con la leche en un bowl." },
-  { id: "2", paso: "Agregar los huevos y batir hasta obtener una mezcla uniforme." },
-  { id: "3", paso: "Calentar el sartén y verter un poco de mezcla." },
-  { id: "4", paso: "Cocinar por ambos lados hasta dorar." },
-];
+    const direccion = ip();
+    const route = useRoute();
+    const { cve } = route.params;
+    const [receta, setReceta] = useState(null);
+
+useEffect(() => {
+    fetch(`http://${direccion}/moviles/Recetas.php?cve=${cve}`)
+        .then(res => res.json())
+        .then(data => {
+            setReceta(data);
+            console.log("URL de la imagen:", data.IMAGEN); // <--- aquí
+        })
+        .catch(err => console.log(err));
+}, [])
 
   return (
     <ImageBackground source={require("../assets/Group 1.png")} style={styles.background} imageStyle={styles.backgroundImage}>
         <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
         <View style={styles.ImgTitulo}>
             <View style={styles.ImgPrincipal}>
-                <Image style={styles.ImgCon}source={require("../assets/ImgPrueba2.png")}/>
+                {receta?.IMAGEN && (
+                <Image style={styles.ImgCon} source={{ uri: receta.IMAGEN }} />
+                )}
             </View>
             <View style={styles.TitComida}>
-                <Text style={styles.Titulo}>Hot Cakes</Text>
+                <Text style={styles.Titulo}>{receta?.NOMBRE}</Text>
             </View>
         </View>
         <View style={styles.ContAbajo}>
@@ -33,34 +37,27 @@ const instrucciones = [
                 <View style={styles.MIzqC}>
                     <Text style={styles.IzqTitulo}>Ingredientes</Text>
                     <FlatList
-                    data={comidas}
+                    data={receta?.INGREDIENTES}
                     scrollEnabled={false}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
-                        <View style={{ padding: 3, alignSelf:"Left"}}>
-                        <Text style={{ fontSize: 16 }}> • {item.nombre}</Text>
+                        <View style={{ padding: 3, alignSelf:"flex-start"}}>
+                        <Text style={{ fontSize: 16 }}> • {item.NOMBRE} ({item.CANTIDAD} {item.UNIDAD})</Text>
                         </View>
                     )}
                     />
                 </View>
                 <View style={styles.MIzqC}>
                     <Text style={styles.IzqTitulo}>Descripción</Text>
-                    <Text>--------------------</Text>
+                    <Text>{receta?.CALORIAS} Kcal</Text>
+                    <Text>Para {receta?.TAMANO} personas</Text>
+                    <Text>Dificultad: {receta?.DIFICULTAD}</Text>
                 </View>
             </View>
             <View style={styles.MDer}>
                 <View style={styles.MDerC}>
-                    <Text style={styles.IzqTitulo} >Instrucciones</Text>
-                    <FlatList
-                    data={instrucciones}
-                    scrollEnabled={false}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <Text style={{ marginBottom: 6 }}>
-                        Paso {item.id}{"\n"}• {item.paso}
-                        </Text>
-                    )}
-                    />
+                    <Text style={styles.IzqTitulo}>Instrucciones</Text>
+                    <Text>{receta?.DESCRIPCION}</Text>
                 </View>
             </View>
         </View>

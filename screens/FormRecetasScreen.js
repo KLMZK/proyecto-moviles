@@ -22,6 +22,15 @@ export default function FormRecetasScreen() {
   const [ListIngr, setLisIngr] = useState([]);
   const [imageUri, setImageUri] = useState(null);
 
+  const [pasos, setPasos] = useState([""]);
+
+  const actualizarPaso = (index, texto) => {
+    const nuevosPasos = [...pasos];
+    nuevosPasos[index] = texto;
+    setPasos(nuevosPasos);
+  };
+
+  const agregarPaso = () => setPasos([...pasos, ""]);
   useEffect(() => {
     fetch(`http://${direccion}/moviles/SelectIngredientes.php`)
       .then(res => res.json())
@@ -97,7 +106,7 @@ export default function FormRecetasScreen() {
     const formData = new FormData();
     formData.append("nombre", nombre.trim());
     formData.append("clas", clas.trim());
-    formData.append("instrucciones", instrucciones.trim());
+    formData.append("instrucciones", JSON.stringify(pasos.filter(p => p.trim() !== "")));
     formData.append("ingrediente", JSON.stringify(ListIngr));
     formData.append("calorias", calorias.trim());
     formData.append("dificultad", dificultad.trim());
@@ -134,7 +143,7 @@ export default function FormRecetasScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+        <ImageBackground source={require("../assets/fondopantalla.png")} style={styles.background} imageStyle={styles.backgroundImage}>
           <View style={styles.Saludo}>
             <Image source={require("../assets/Recetas.png")} style={styles.ImgSaludo2}/>
             <Text style={styles.TextSaludo}>Nueva</Text>
@@ -156,6 +165,18 @@ export default function FormRecetasScreen() {
                 <Picker.Item label="Snacks" value="6" />
               </Picker>
               <Text style={styles.TitInput}>Instrucciones:</Text>
+                    {pasos.map((paso, i) => (
+                        <TextInput
+                            key={i}
+                            value={paso}
+                            onChangeText={(text) => actualizarPaso(i, text)}
+                            placeholder={`Paso ${i + 1}`}
+                            style={[styles.input2, { height: 50 }]}
+                        />
+                    ))}
+              <TouchableOpacity onPress={agregarPaso} style={[styles.boton,{marginBottom:10}]}>
+                <Text style={styles.textoBoton}>Agregar paso</Text>
+              </TouchableOpacity>
               <TextInput value={instrucciones} onChangeText={setInstrucciones} placeholder="Instrucciones" style={[styles.input2, { textAlignVertical: "top", height: 100 }]} multiline placeholderTextColor="#999"/>
               
               <Text style={styles.TitInput}>Tipo (filtro ingredientes):</Text>
@@ -279,16 +300,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#3A4B41",
   },
   backgroundImage: {
-    width: "100%",    
-    height: "100%",   
-    resizeMode: "contain",
-    position: "absolute",
-    top:-225,        
+    width: '200%',    
+    height: '100%',   
+    resizeMode: "cover",
+    position: "absolute",    
   },
   Saludo: {
+    backgroundColor:"#E6CFA6",
     bottom:30,
     width: "100%",
-    height:"11%",
+    height:140,
     alignItems:"center",
   },
   TextSaludo: {
