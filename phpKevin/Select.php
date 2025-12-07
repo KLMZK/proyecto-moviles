@@ -5,8 +5,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
 
 include("conexion.php");
-$server_ip = $_SERVER['SERVER_ADDR'];
-$base_url = "http://$server_ip/moviles/uploads/";
+$ip = $_SERVER['SERVER_ADDR'];
 
 $sql = "
 SELECT 
@@ -47,7 +46,7 @@ while ($row = $result->fetch_assoc()) {
     }
     if ($row["idRecetas"] != null) {
         $nombre_archivo = $nombre_receta_sanitizado . "_" . $row["idRecetas"] . ".jpg";
-        $imagen_url = $base_url . $nombre_archivo;
+        $imagen = $base_url . $nombre_archivo;
         $categorias[$id]["recetas"][] = [
             "idReceta" => $row["idRecetas"],
             "nombreRecetas" => $row["nombreRecetas"],
@@ -55,7 +54,7 @@ while ($row = $result->fetch_assoc()) {
             "dificultad" => $row["dificultad"],
             "tamano" => $row["tamano"],
             "ingredientes" => $row["ingredientes"],
-            "imagen" => $imagen_url 
+            "imagen" => "http://".$ip."/moviles/uploads/".$row["nombreRecetas"]."_".$row["idRecetas"].".jpg"
         ];
     }
 }

@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -9,17 +12,26 @@ include("conexion.php");
 
 $nombre =$_POST['nombre'] ?? '';
 $clas =$_POST['clas'] ?? '';
-$instrucciones = $_POST['instrucciones'] ?? '';
+$instrucciones = json_decode($_POST['instrucciones'] ?? '[]', true);
 $ingrediente = json_decode($_POST['ingrediente'] ?? '[]', true);
+if (!is_array($ingrediente)) $ingrediente = [];
 $calorias = $_POST['calorias'] ?? '';
 $dificultad = $_POST['dificultad'] ?? '';
 $personas = $_POST['personas'] ?? '';
 $presupuesto = $_POST['presupuesto'] ?? '';
 $upload_dir = "uploads/";
+$instruccionesConPaso = [];
+foreach($instrucciones as $index => $paso) {
+    $paso = trim($paso);
+    if($paso !== "") {
+        $instruccionesConPaso[] = "Paso ".($index+1).": $paso";
+    }
+}
+$instruccionesTexto = implode("\n", $instruccionesConPaso);
 
 
 $sql = "INSERT INTO recetas (CVE_RECETA, NOMBRE, DESCRIPCION, CALORIAS, DIFICULTAD, TAMANO, PRESUPUESTO) 
-        VALUES ('','$nombre', '$instrucciones', '$calorias', '$dificultad', '$personas', '$presupuesto')";
+        VALUES ('','$nombre', '$instruccionesTexto', '$calorias', '$dificultad', '$personas', '$presupuesto')";
 
 if (mysqli_query($conexion, $sql)) {
     $idReceta = mysqli_insert_id($conexion);
@@ -42,8 +54,6 @@ if (mysqli_query($conexion, $sql)) {
 } else {
     echo json_encode(["ingreso" => 0]);
 }
-
-$upload_dir = "uploads/";
 
 if (!file_exists($upload_dir)) {
     mkdir($upload_dir, 0755, true); 

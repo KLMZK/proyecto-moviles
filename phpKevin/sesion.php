@@ -25,7 +25,6 @@ if(mysqli_num_rows($result) == 0){
     while($row = $result->fetch_assoc()) {
         $usuario[] = $row;
     }
-
     $_SESSION['usuario'] = $usuario;
 }
 

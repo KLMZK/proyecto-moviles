@@ -14,7 +14,6 @@ useEffect(() => {
         .then(res => res.json())
         .then(data => {
             setReceta(data);
-            console.log("URL de la imagen:", data.IMAGEN); // <--- aquí
         })
         .catch(err => console.log(err));
 }, [])
