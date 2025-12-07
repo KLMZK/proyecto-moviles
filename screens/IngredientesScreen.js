@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react"; 
 import { TouchableOpacity, View, Text, Image, StyleSheet, ImageBackground, KeyboardAvoidingView, ScrollView, Platform } from "react-native"; 
 import Checkbox from 'expo-checkbox'; 
-import { useNavigation } from "@react-navigation/native"; 
+import { useNavigation, useIsFocused } from "@react-navigation/native"; 
 import ip from './global';
 
 export default function IngredientesScreen() {
   const direccion = ip();
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const defaultCategories = {
     'Frutas y Verduras': [],
     'Panadería y Pastelería': [],
@@ -21,32 +22,33 @@ export default function IngredientesScreen() {
     const [ingredients, setIngredients] = useState(defaultCategories);
    const [checks, setChecks] = useState({});
 
+   const fetchIngredients = () => {
+     fetch(`http://${direccion}/moviles/SelectIngredientes.php`)
+       .then(res => res.json())
+       .then(data => {
+         let categorized = defaultCategories;
+         if (Array.isArray(data)) {
+           categorized = categorizeIngredients(data);
+         } else if (data && typeof data === 'object') {
+           if (data.ingredientes && typeof data.ingredientes === 'object') {
+             categorized = { ...defaultCategories, ...data.ingredientes };
+           } else if (Array.isArray(data.data)) {
+             categorized = categorizeIngredients(data.data);
+           }
+         }
+         setIngredients(categorized);
+         initializeChecks(categorized);
+       })
+       .catch(err => {
+         console.error(err);
+         setIngredients(defaultCategories);
+         setChecks({});
+       });
+   };
+
    useEffect(() => {
-    const fetchIngredients = () => {
-      fetch(`http://${direccion}/moviles/SelectIngredientes.php`)
-        .then(res => res.json())
-        .then(data => {
-          let categorized = defaultCategories;
-          if (Array.isArray(data)) {
-            categorized = categorizeIngredients(data);
-          } else if (data && typeof data === 'object') {
-            if (data.ingredientes && typeof data.ingredientes === 'object') {
-              categorized = { ...defaultCategories, ...data.ingredientes };
-            } else if (Array.isArray(data.data)) {
-              categorized = categorizeIngredients(data.data);
-            }
-          }
-          setIngredients(categorized);
-          initializeChecks(categorized);
-        })
-        .catch(err => {
-          console.error(err);
-          setIngredients(defaultCategories);
-          setChecks({});
-        });
-    };
-    fetchIngredients();
-   }, []);
+     if (isFocused) fetchIngredients();
+   }, [isFocused]);
 
    const categorizeIngredients = (data) => {
      const categories = {
@@ -60,7 +62,6 @@ export default function IngredientesScreen() {
        'Bebidas': [],
        'Snacks y Dulces': [],
      };
-    // si no es array devolvemos las categorías vacías (solo nombres)
     if (!Array.isArray(data)) return JSON.parse(JSON.stringify(categories));
     data.forEach(item => {
       if (item && item.clasificacion && categories[item.clasificacion]) {
@@ -102,9 +103,11 @@ export default function IngredientesScreen() {
                    <Text style={styles.TextCla}>{category}</Text>
                    {ingredients[category].map(item => (
                      <View key={item.nombre} style={[styles.Contenido, {alignItems:"center"}]}>
-                       <Checkbox value={checks[item.nombre]} onValueChange={() => setChecks({ ...checks, [item.nombre]: !checks[item.nombre] })} color={checks[item.nombre] ? "#4CAF50" : undefined}/>
+                       <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormIngredientes', { mode: 'update', ingredient: item })}>
+                        <Image source={require("../assets/mas.png")} style={[styles.iconMas,{width:20, height:20}]}/>
+                       </TouchableOpacity>
                        <Text style={[styles.Text,{width:100, left:20}]}>{item.nombre}</Text>
-                       <Text style={[styles.Text,{width:80, left:40}]}>Qty: {item.cantidad}</Text>
+                       <Text style={[styles.Text,{width:80, left:40}]}>Cnt: {item.cantidad}</Text>
                        <Text style={[styles.Text,{width:80, left:50}]}>${item.costo}</Text>
                      </View>
                    ))}

@@ -9,38 +9,35 @@ export default function InicioScreen() {
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
     const [categoria, setCategoria] = useState([]);
-      const [correo, setCorreo] = useState("");
-      const[id, setID]=useState("");
-
-
+    const [correo, setCorreo] = useState("");
+    const[id, setID]=useState("");
     useFocusEffect(
-            useCallback(() => {
-        async function cargarNombre() {
-            const nombreGuardado = await AsyncStorage.getItem("nombre");
-            if (nombreGuardado) setNombre(nombreGuardado);
+      useCallback(() => {
+        let activo = true;
+        async function cargarDatosBasicos() {
+          const nombreGuardado = await AsyncStorage.getItem("nombre");
+          const correoGuardado = await AsyncStorage.getItem("correo");
+          const IDGuardado = await AsyncStorage.getItem("id");
+          if (!activo) return;
+          if (nombreGuardado) setNombre(nombreGuardado);
+          if (correoGuardado) setCorreo(correoGuardado);
+          if (IDGuardado) setID(IDGuardado);
         }
-        async function cargarCorreo() {
-            const correoGuardado = await AsyncStorage.getItem("correo");
-            if (correoGuardado) setCorreo(correoGuardado);
-            }
-        async function cargarID() {
-            const IDGuardado = await AsyncStorage.getItem("id");
-            if (IDGuardado) setID(IDGuardado);
-        }
-    
-
         async function consulta() {
-            fetch(`http://${direccion}/moviles/Select.php`)
-                .then(res => res.json())
-                .then(data => setCategoria(data))
-                .catch(err => console.log(err));
+          try {
+            const res = await fetch(`http://${direccion}/moviles/Select.php`);
+            const data = await res.json();
+            if (!activo) return;
+            setCategoria(data);
+          } catch (err) {
+            console.log(err);
+          }
         }
-        cargarCorreo();
-        cargarID();
-        cargarNombre();
+        cargarDatosBasicos();
         consulta();
-    }, [])
-);
+        return () => { activo = false; };
+      }, [direccion])
+    );
     function saludoSegunHora() {
         const hora = new Date().getHours();
         if (hora < 12) return "Buenos días";
