@@ -1,204 +1,280 @@
-import React, {useState,useEffect} from "react";
-import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState, useEffect, useMemo } from "react";
+import { TouchableOpacity, ScrollView, View, Text, Image, StyleSheet, ImageBackground, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from "@react-navigation/native";
+import ip from './global';
 
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - day);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function formatDate(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+const DAY_NAMES = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
 export default function RecetaScreen() {
   const navigation = useNavigation();
-  const [semana, setSemana] = useState("");
+  const direccion = ip();
+
+  const [period, setPeriod] = useState('current');
+  const [agendaItems, setAgendaItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const [showAdd, setShowAdd] = useState({});
+  const [selectedRecipe, setSelectedRecipe] = useState({});
+
+  const weekRange = useMemo(() => {
+    const today = new Date();
+    const base = startOfWeek(today);
+    if (period === 'previous') base.setDate(base.getDate() - 7);
+    if (period === 'next') base.setDate(base.getDate() + 7);
+    const start = new Date(base);
+    const end = new Date(base);
+    end.setDate(end.getDate() + 6);
+    return { start, end };
+  }, [period]);
+
+  useEffect(() => {
+    fetchAgenda();
+    fetchRecipes();
+  }, [weekRange]);
+
+  async function fetchRecipes() {
+    try {
+      const res = await fetch(`http://${direccion}/moviles/SelectRecetas.php`);
+      const data = await res.json();
+      setRecipes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error cargando recetas:", err);
+    }
+  }
+
+  async function fetchAgenda() {
+    setLoading(true);
+    try {
+      const start = formatDate(weekRange.start);
+      const end = formatDate(weekRange.end);
+      const res = await fetch(`http://${direccion}/moviles/SelectAgenda.php?start=${start}&end=${end}`);
+      const data = await res.json();
+      setAgendaItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error','No se pudo cargar la agenda');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addToAgenda(fecha) {
+    const cve = selectedRecipe[fecha];
+    if (!cve) { Alert.alert('Selecciona', 'Seleccione una receta'); return; }
+    try {
+      const res = await fetch(`http://${direccion}/moviles/AddAgenda.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cve_receta: cve, fecha })
+      });
+      const json = await res.json();
+      if (json.estado == 1) {
+        setShowAdd(prev => ({ ...prev, [fecha]: false }));
+        setSelectedRecipe(prev => ({ ...prev, [fecha]: undefined }));
+        fetchAgenda();
+      } else {
+        Alert.alert('Error','No se pudo agregar a la agenda');
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error','No se pudo conectar al servidor');
+    }
+  }
+
+  async function deleteAgendaItem(cve_agenda) {
+    try {
+      const res = await fetch(`http://${direccion}/moviles/DeleteAgenda.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cve_agenda })
+      });
+      const json = await res.json();
+      if (json.estado == 1) {
+        fetchAgenda();
+      } else {
+        Alert.alert('Error','No se pudo eliminar');
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error','No se pudo conectar al servidor');
+    }
+  }
+
+  const days = useMemo(() => {
+    const daysArr = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekRange.start);
+      d.setDate(d.getDate() + i);
+      const fecha = formatDate(d);
+      daysArr.push({
+        name: DAY_NAMES[i],
+        fecha,
+        items: agendaItems.filter(a => a.FECHA === fecha)
+      });
+    }
+    return daysArr;
+  }, [agendaItems, weekRange]);
+
+  async function Preparado(item) {
+    const nuevo = item.preparado == 1 ? 0 : 1;
+    setAgendaItems(prev => prev.map(p => p.CVE_AGENDA === item.CVE_AGENDA ? {...p, preparado: nuevo} : p));
+    try {
+      const res = await fetch(`http://${direccion}/moviles/Preparado.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cve_agenda: item.CVE_AGENDA, preparado: nuevo })
+      });
+      const json = await res.json();
+      if (!json || json.estado != 1) {
+        throw new Error('no actualizado');
+      }
+    } catch (err) {
+      setAgendaItems(prev => prev.map(p => p.CVE_AGENDA === item.CVE_AGENDA ? {...p, preparado: item.preparado} : p));
+      Alert.alert('Error','No se pudo actualizar el estado');
+    }
+  }
+
   return (
-    
     <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-    <View style={styles.Saludo}>
+      <View style={styles.Saludo}>
         <Image source={require("../assets/Planes.png")} style={styles.ImgSaludo2}/>
         <Text style={styles.TextSaludo}>Planificador</Text>
         <Image source={require("../assets/Planes.png")} style={styles.ImgSaludo}/>
-    </View>
-    <View style={styles.InputContenedor}>
-      <Image source={require("../assets/calendario.png")} style={styles.icon}/>
-        <Picker selectedValue={semana} onValueChange={(itemValue) => setSemana(itemValue)} style={styles.inputInferior}>
-          <Picker.Item label="Semana 1" value="Semana 1" />
-          <Picker.Item label="Semana 2" value="Semana 2" />
-          <Picker.Item label="Semana 3" value="Semana 3" />
-          <Picker.Item label="Semana 4" value="Semana 4" />
-        </Picker>
-    </View>
-      <View style={styles.Contenedor}>
-        <View style={styles.ConHorizontal}>
-          <View style={styles.ConImg}>
-            <TouchableOpacity onPress={() => navigation.navigate('InfoComidas')}>
-              <Image source={require("../assets/ImgPrueba2.png")} style={styles.ImgRecetas}/>
-            </TouchableOpacity>
-            <View style={styles.TextoTit}>
-              <Text style={styles.TituCom}>Hot cakes </Text>
-              <TouchableOpacity>
-                <Image source={require("../assets/editar.png")} style={styles.icon}/>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.ConImg}>
-            <TouchableOpacity>
-              <Image source={require("../assets/ImgPrueba2.png")} style={styles.ImgRecetas}/>
-            </TouchableOpacity>
-            <View style={styles.TextoTit}>
-              <Text style={styles.TituCom}>Hot cakes </Text>
-              <TouchableOpacity>
-                <Image source={require("../assets/editar.png")} style={styles.icon}/>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </View>
+
+      <View style={styles.InputContenedor}>
+        <Image source={require("../assets/calendario.png")} style={[styles.icon, {width:20, height:20}]}/>
+        <Picker selectedValue={period} onValueChange={(v) => setPeriod(v)} style={styles.inputInferior}>
+          <Picker.Item label="Semana anterior" value="previous" />
+          <Picker.Item label="Semana actual" value="current" />
+          <Picker.Item label="Próxima semana" value="next" />
+        </Picker>
+      </View>
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+        <View style={styles.Contenedor}>
+          {days.map(day => (
+            <View key={day.fecha} style={styles.DiaBlock}>
+
+              <View style={[styles.DiaHeader, styles.DiaHeaderRow]}>
+                <Text style={styles.DiaTitulo}>{day.name} — {day.fecha}</Text>
+                <TouchableOpacity onPress={() => setShowAdd(prev => ({ ...prev, [day.fecha]: !prev[day.fecha] }))} style={styles.addToggle}>
+                  <Text style={styles.addToggleText}>{ showAdd[day.fecha] ? 'Cancelar' : 'Agregar receta' }</Text>
+                </TouchableOpacity>
+              </View>
+
+              { showAdd[day.fecha] && (
+                <View style={styles.addPanel}>
+                  <View style={styles.addCard}>
+                    <Picker selectedValue={selectedRecipe[day.fecha] ?? ""} onValueChange={(v) => setSelectedRecipe(prev => ({ ...prev, [day.fecha]: v }))}>
+                      <Picker.Item label="Seleccionar receta" value="" />
+                      {recipes.map(r => <Picker.Item key={r.CVE_RECETA} label={`${r.NOMBRE}`} value={r.CVE_RECETA} />)}
+                    </Picker>
+                    <TouchableOpacity style={[styles.boton, { marginTop: 8 }]} onPress={() => addToAgenda(day.fecha)}>
+                      <Text style={styles.textoBoton}>Agregar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              <ScrollView
+                horizontal
+                nestedScrollEnabled={true}                   
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={[styles.ContHorizon]}  
+              >
+                {day.items.length === 0 ? (
+                  <View style={styles.EmptyCard}><Text style={styles.emptyText}>Sin recetas</Text></View>
+                ) : day.items.map(item => (
+                  <View key={item.CVE_AGENDA} style={styles.Card}>
+                    <TouchableOpacity onPress={() => navigation.navigate('InfoComidas', { data: { idReceta: item.CVE_RECETA, nombreRecetas: item.NOMBRE, calorias: item.CALORIAS, tamano: item.TAMANO, dificultad: item.DIFICULTAD, imagen: item.imagen } })}>
+                      <Image style={styles.ImgRecetas} source={{ uri: item.imagen }} />
+                    </TouchableOpacity>
+                    <View style={styles.CardInfo}>
+                      <Text style={styles.infoTitulo}>{item.NOMBRE}</Text>
+                      <View style={styles.infoContenido}>
+                        <Text style={styles.detalles}>{item.CALORIAS} Kcal</Text>
+                        <Text style={styles.detalles}>{item.TAMANO} Pers.</Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                        <Text style={styles.detalles}>Preparado</Text>
+                        <TouchableOpacity onPress={() => Preparado(item)} style={[styles.prepBtn, item.preparado == 1 ? styles.prepBtnOn : styles.prepBtnOff]}>
+                          <Text style={styles.prepText}>{item.preparado == 1 ? 'Sí' : 'No'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => deleteAgendaItem(item.CVE_AGENDA)} style={{ marginLeft: 8 }}>
+                          <Text style={{ color: '#c33', fontWeight: 'bold' }}>Eliminar</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
-inputInferior: {
-  flex: 1,
-  height: 55,
-  justifyContent: "center",
-  textAlign:"center",
-  fontSize: 18,
-  color: "black",
-},
-  container: {
+  inputInferior: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    height: 55,
+    justifyContent: "center",
+    textAlign:"center",
+    fontSize: 18,
+    color: "black",
   },
-  imageContainer: {
-    width: 300,
-    height: 300,
-    borderWidth: 2,
-    borderColor: '#333',
-    borderRadius: 10,
-    marginTop: 20,
-    overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  TextoTit:{
-    flexDirection:"row",
-    justifyContent:"space-between"
-  },
-  icon: {
-    width: 15,
-    height: 15,
-    },
-  TituCom:{
-    left:40,
-    alignSelf:"center",
-    fontSize:18,
-  },
-  ImgRecetas:{
-    bottom:2,
-    borderRadius:20,
-    width:180,
-    height:168,
-  },
-  ConImg:{
-    borderRadius:20,
-    backgroundColor:"#EDEDED"
-  },
-  ConHorizontal:{
-    gap:30,
-    alignContent:"space-between",
-    margin:10,
-    width:"100%",
-    height: 200,
-    flexDirection:"row"
-  },
-  Contenedor:{
-    height:"100%",
-    width:"100%",
-  },
-  InputContenedor: {
-    bottom: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    width: "90%",
-    height:70,
-    backgroundColor: "#f1f1f1",
-    borderRadius: 20,
-  },
-  btnMas: {
-    padding: 5,
-  },
-  iconMas: {
-    right:30,
-    width: 30,
-    height: 30,
-  },
+  TextSaludo: { 
+     top:29, 
+     fontWeight:"bold", 
+     color:"white", 
+     fontSize: 20, 
+     alignSelf:"center", 
+     paddingBlock:20, 
+   }, 
+  ContHorizon:{ paddingRight:20, flexDirection:"row", alignItems:'flex-start' },
+  Contenedor:{ paddingVertical:10 },
+  DiaBlock:{ marginBottom:20 },
+  DiaHeader:{ paddingHorizontal:20, marginBottom:8 },
+  DiaHeaderRow:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' },
+  DiaTitulo:{ color:"white", fontWeight:"bold", fontSize:16 },
+  Card:{ width:180, marginLeft:20, backgroundColor:"#EDEDED", borderRadius:16, overflow:'hidden' },
+  ImgRecetas:{ width: '100%', height:120, resizeMode:'cover' },
+  CardInfo:{ padding:8 },
+  infoTitulo:{ fontSize:14, fontWeight:'bold' },
+  infoContenido:{ flexDirection:'row', justifyContent:'space-between', marginTop:6 },
+  detalles:{ fontSize:12, color:'#444' },
+  EmptyCard:{ width:180, marginLeft:20, height:160, borderRadius:12, justifyContent:'center', alignItems:'center', backgroundColor:'#f2f2f2' },
+  emptyText:{ color:'#666' },
+  prepBtn:{ paddingHorizontal:12, paddingVertical:6, borderRadius:12 },
+  prepBtnOn:{ backgroundColor:'#7fbf7f' },
+  prepBtnOff:{ backgroundColor:'#ddd' },
+  prepText:{ color:'#fff', fontWeight:'bold' },
 
-    icon: {
-        width: 20,
-        height: 20,
-        marginRight: 10,
-    },
-    TextSaludo: {
-      top:29,
-      fontWeight:"bold",
-        color:"white",
-        fontSize: 20,
-        alignSelf:"center",
-        paddingBlock:20, 
-    }, 
-    Saludo: {
-        bottom:30,
-        marginBlock:10,
-        width: "100%",
-        height:"14%",
-        alignItems:"center",
-    },
-      ImgSaludo2: {
-        alignSelf:"flex-end",
-        left:240,
-        width: "60%",    
-        height: "60%",   
-        resizeMode: "contain",
-        position: "absolute",
-        top:30,     
-    }, 
-    ImgSaludo: {
-        width: "60%",    
-        height: "60%",   
-        resizeMode: "contain",
-        position: "absolute",
-        right:240,
-        top:30,     
-    }, 
-    
-    background: {
-        flex: 1,
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-        paddingTop: 30,
-        backgroundColor: "#3A4B41",
-    },
-
-    backgroundImage: {
-        width: "100%",    
-        height: "100%",   
-        resizeMode: "contain",
-        position: "absolute",
-        top: -40,        
-    },
-    input: {
-        width: "90%",
-        height:50,
-        backgroundColor: "#f1f1f1",
-        padding: 12,
-        borderRadius: 20,
-        marginBlock: 40,
-    },
+  Saludo:{ bottom:30, width:"100%", height:"14%", alignItems:"center" },
+  ImgSaludo2:{ alignSelf:"flex-end", left:240, width:"60%", height:"60%", resizeMode:"contain", position:"absolute", top:30 },
+  ImgSaludo:{ width:"60%", height:"60%", resizeMode:"contain", position:"absolute", right:240, top:30 },
+  background:{ flex:1, width:"100%", height:"100%", alignItems:"center", paddingTop:30, backgroundColor:"#3A4B41" },
+  backgroundImage:{ width:"100%", height:"100%", resizeMode:"contain", position:"absolute", top:-40 },
+  InputContenedor:{ flexDirection: "row", alignItems: "center", paddingHorizontal: 10, width: "90%", height:70, backgroundColor: "#f1f1f1", borderRadius: 20 },
+  addPanel:{ width: '100%', backgroundColor: '#fff', borderRadius: 8, padding: 8, marginTop: 8 },
+  addCard:{ flexDirection: 'column', },
+  addToggle:{ padding: 8, borderRadius: 16, backgroundColor: '#5cb85c', alignSelf: 'flex-end' },
+  addToggleText:{ color: '#fff', fontWeight: 'bold' },
 });

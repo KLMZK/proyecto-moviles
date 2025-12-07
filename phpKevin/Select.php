@@ -45,8 +45,9 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
     if ($row["idRecetas"] != null) {
-        $nombre_archivo = $nombre_receta_sanitizado . "_" . $row["idRecetas"] . ".jpg";
-        $imagen = $base_url . $nombre_archivo;
+        $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $row["nombreRecetas"]);
+        $nombre_archivo = $nombre_limpio.'_'. $row["idRecetas"] . ".jpg";
+        $imagen_url = $base_url . $nombre_archivo;
         $categorias[$id]["recetas"][] = [
             "idReceta" => $row["idRecetas"],
             "nombreRecetas" => $row["nombreRecetas"],
