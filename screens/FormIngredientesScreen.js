@@ -111,7 +111,7 @@ export default function FormIngredientesScreen() {
                           <Picker.Item label="ml" value="ml" />
                           <Picker.Item label="Kg" value="Kg" />
                           <Picker.Item label="g" value="g" />
-                          <Picker.Item label="U" value="U" />
+                          <Picker.Item label="Pza" value="Pza" />
                         </Picker>
                         <Text style={styles.TitInput}>Cantidad:</Text>
                         <TextInput value={cantidad} keyboardType={"decimal-pad"} onChangeText={setCantidad} placeholder="Cantidad del Ingrediente" style={styles.input2} placeholderTextColor="#999" />
