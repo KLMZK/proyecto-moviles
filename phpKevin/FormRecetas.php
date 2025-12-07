@@ -26,19 +26,24 @@ if (mysqli_query($conexion, $sql)) {
     mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta')");
 
     foreach ($ingrediente as $ing) {
-        $nomIngr = $ing['ingrediente'];
-        $cantidad = $ing['cantidad'];
-        $costo = $ing['costo']?? 0;
-        $unidad = $ing['unidad']?? '';
-        $clasificacion = $ing['clasificacion']??'';
-        mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD)
-                             VALUES ('', '$nomIngr', '','$costo','$clasificacion','$unidad')");
-        $idIngr = mysqli_insert_id($conexion);
-        mysqli_query($conexion,"INSERT INTO utiliza (CVE_INGREDIENTE,CVE_RECETA,CANTIDAD)
-                                    VALUES ('$idIngr','$idReceta','$cantidad')");
-    }
+        $cantidad = $ing['cantidad'] ?? 0;
+        $costo = $ing['costo'] ?? 0;
+        $unidad = $ing['unidad'] ?? '';
+        $clasificacion = $ing['clasificacion'] ?? '';
 
-    echo json_encode(["ingreso" => 1]);
+        if (!empty($ing['cve_ingrediente'])) {
+            $idIngr = $conexion->real_escape_string($ing['cve_ingrediente']);
+        } else {
+            $nomIngr = $conexion->real_escape_string($ing['ingrediente'] ?? '');
+            mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD)
+                                 VALUES ('', '$nomIngr', '', '$costo', '$clasificacion', '$unidad')");
+            $idIngr = mysqli_insert_id($conexion);
+        }
+        mysqli_query($conexion, "INSERT INTO utiliza (CVE_INGREDIENTE, CVE_RECETA, CANTIDAD)
+                                 VALUES ('$idIngr', '$idReceta', '$cantidad')");
+     }
+ 
+     echo json_encode(["ingreso" => 1]);
 } else {
     echo json_encode(["ingreso" => 0]);
 }
