@@ -1,22 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TouchableOpacity, View, Text, TextInput, Image, StyleSheet, ImageBackground, KeyboardAvoidingView, ScrollView, Platform , Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import ip from './global';
-import { set } from "date-fns";
+import { useNavigation } from "@react-navigation/native";
 
 export default function FormRecetasScreen() {
   const direccion = ip();
+  const navigation = useNavigation();
   const [nombre, setNombre] = useState("");
-  const [ingrediente, setIngrediente] = useState("");
+  const [availableIngredients, setAvailableIngredients] = useState([]);
+  const [selectedIngrId, setSelectedIngrId] = useState("");
   const [instrucciones, setInstrucciones] = useState("");
   const [calorias, setCalorias] = useState("");
   const [dificultad, setDificultad] = useState("");
   const [personas, setPersonas] = useState("");
   const [presupuesto, setPresupuesto] = useState("");
   const [cantidad, setCantidad] = useState("");
-  const [costo, setCosto] = useState("");
-  const [unidad, setUnidad] = useState("");
   const [clas, setClas] = useState("");
   const [clasificacion, setClasificacion] = useState("");
   const [ListIngr, setLisIngr] = useState([]);
@@ -31,6 +31,35 @@ export default function FormRecetasScreen() {
   };
 
   const agregarPaso = () => setPasos([...pasos, ""]);
+  useEffect(() => {
+    fetch(`http://${direccion}/moviles/SelectIngredientes.php`)
+      .then(res => res.json())
+      .then(data => {
+        const list = [];
+        if (data && data.ingredientes) {
+          Object.keys(data.ingredientes).forEach(cat => {
+            data.ingredientes[cat].forEach(item => {
+              list.push({
+                cve_ingrediente: item.cve_ingrediente || item.CVE_INGREDIENTE || item.id,
+                nombre: item.nombre,
+                cantidad: item.cantidad,
+                clasificacion: cat
+              });
+            });
+          });
+        }
+        setAvailableIngredients(list);
+      })
+      .catch(err => {
+        console.error("Error cargando ingredientes:", err);
+        setAvailableIngredients([]);
+      });
+  }, []);
+
+  const filteredIngredients = useMemo(() => {
+    if (!clasificacion) return availableIngredients;
+    return availableIngredients.filter(i => i.clasificacion === clasificacion);
+  }, [availableIngredients, clasificacion]);
 
   const pickImage = async () => {
     if (Platform.OS !== 'web') {
@@ -50,21 +79,29 @@ export default function FormRecetasScreen() {
       setImageUri(result.assets[0].uri);
     }
   };
-
+  
   const agregarIngrediente = () => {
-    if (!ingrediente.trim() || !cantidad.trim()) return;
-    setLisIngr([...ListIngr, { id: Date.now().toString(), ingrediente, cantidad, costo, clasificacion,unidad }]);
-    setIngrediente("");
+    if (!selectedIngrId || !cantidad.trim()) {
+      Alert.alert("Error", "Seleccione un ingrediente y especifique cantidad");
+      return;
+    }
+    const sel = availableIngredients.find(i => String(i.cve_ingrediente) === String(selectedIngrId));
+    if (!sel) return;
+    setLisIngr([...ListIngr, {
+      id: Date.now().toString(),
+      cve_ingrediente: sel.cve_ingrediente,
+      ingrediente: sel.nombre,
+      cantidad,
+      clasificacion: sel.clasificacion || clasificacion
+    }]);
+    setSelectedIngrId("");
     setCantidad("");
-    setCosto("");
-    setClasificacion("");
-    setUnidad("");
   };
-
+  
   const eliminarIngrediente = (id) => {
     setLisIngr(ListIngr.filter(item => item.id !== id));
   };
-
+  
   function enviar() {
     const formData = new FormData();
     formData.append("nombre", nombre.trim());
@@ -75,8 +112,8 @@ export default function FormRecetasScreen() {
     formData.append("dificultad", dificultad.trim());
     formData.append("personas", personas.trim());
     formData.append("presupuesto", presupuesto.trim());
-    formData.append("imagen", {uri: imageUri, type: "image/jpeg", name: `foto_"${nombre}".jpg`});
-
+    if (imageUri) formData.append("imagen", {uri: imageUri, type: "image/jpeg", name: `foto_"${nombre}".jpg`});
+ 
     fetch(`http://${direccion}/moviles/FormRecetas.php`,{
       method: 'POST', 
       headers: {},
@@ -85,8 +122,8 @@ export default function FormRecetasScreen() {
     .then(response => response.json())
     .then(datos => {
       if(datos.ingreso == 1) {
-        navigation.navigate('Login');
-        Alert.alert("Exito","Receta guardada correctamente.")
+        navigation.goBack();
+         Alert.alert("Exito","Receta guardada correctamente.")
       } else {
         Alert.alert("Error", "La receta no se ha guardado correctamente. Intentelo de nuevo")
       }
@@ -100,8 +137,9 @@ export default function FormRecetasScreen() {
     setPresupuesto("");
     setImageUri("");
     setClas("");
+    setClasificacion("");
   }
-
+  
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -139,51 +177,54 @@ export default function FormRecetasScreen() {
               <TouchableOpacity onPress={agregarPaso} style={[styles.boton,{marginBottom:10}]}>
                 <Text style={styles.textoBoton}>Agregar paso</Text>
               </TouchableOpacity>
+              <TextInput value={instrucciones} onChangeText={setInstrucciones} placeholder="Instrucciones" style={[styles.input2, { textAlignVertical: "top", height: 100 }]} multiline placeholderTextColor="#999"/>
+              
+              <Text style={styles.TitInput}>Tipo (filtro ingredientes):</Text>
+              <Picker selectedValue={clasificacion} onValueChange={(v) => setClasificacion(v)} style={[styles.input2]}>
+                <Picker.Item label="Todos los tipos" value="" />
+                <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
+                <Picker.Item label="Panadería y Pastelería" value="Panadería y Pastelería" />
+                <Picker.Item label="Refrigerados" value="Refrigerados" />
+                <Picker.Item label="Carnicería" value="Carnicería" />
+                <Picker.Item label="Pescadería" value="Pescadería" />
+                <Picker.Item label="Congelados" value="Congelados" />
+                <Picker.Item label="Despensa / Secos (Abarrotes)" value="Despensa / Secos (Abarrotes)" />
+                <Picker.Item label="Bebidas" value="Bebidas" />
+                <Picker.Item label="Snacks y Dulces" value="Snacks y Dulces" />
+              </Picker>
+
               <Text style={styles.TitInput}>Ingredientes:</Text>
               <View style={{ flexDirection: "row", width: "100%", justifyContent: "center", alignItems: "center" }}>
                 <View style={{ flex: 1 }}>
                   <View style={[styles.fila,{left:20,}]}>
-                    <TextInput placeholder="Ingrediente" value={ingrediente} onChangeText={setIngrediente} style={styles.inputInferior} placeholderTextColor="#999"/>
-                    <Picker selectedValue={clasificacion} onValueChange={(itemValue) => setClasificacion(itemValue)} style={styles.inputInferior}>
-                      <Picker.Item label="Clasif" value="" />
-                      <Picker.Item label="Frutas y Verduras" value="Frutas y Verduras" />
-                      <Picker.Item label="Panadería y Pestelería" value="Panadería y Pestelería" />
-                      <Picker.Item label="Refrigerados" value="Refrigerados" />
-                      <Picker.Item label="Carnicería" value="Carnicería" />
-                      <Picker.Item label="Pescadería" value="Pescadería" />
-                      <Picker.Item label="Congelados" value="Congelados" />
-                      <Picker.Item label="Despensa / Secos (Abarrotes)" value="Despensa / Secos (Abarrotes)" />
-                      <Picker.Item label="Bebidas" value="Bebidas" />
-                      <Picker.Item label="Snacks y Dulces" value="Snacks y Dulces" />
+                    <Picker selectedValue={selectedIngrId} onValueChange={(v)=> setSelectedIngrId(v)} style={styles.inputInferior}>
+                      <Picker.Item label="Seleccionar Ingrediente" value="" />
+                      {filteredIngredients.map(ing => (
+                        <Picker.Item key={ing.cve_ingrediente} label={`${ing.nombre}`} value={String(ing.cve_ingrediente)} />
+                      ))}
                     </Picker>
                   </View>
+
                   <View style={[styles.fila,{left:20,}]}>
                     <TextInput placeholder="Cantidad" value={cantidad} keyboardType={"decimal-pad"} onChangeText={setCantidad} style={styles.inputInferior} placeholderTextColor="#999"/>
-                    <Picker selectedValue={unidad} onValueChange={(itemValue) => setUnidad(itemValue)} style={styles.inputInferior}>
-                      <Picker.Item label="U" value="" />
-                      <Picker.Item label="L" value="L" />
-                      <Picker.Item label="ml" value="ml" />
-                      <Picker.Item label="Kg" value="Kg" />
-                      <Picker.Item label="g" value="g" />
-                      <Picker.Item label="Pieza" value="pzas" />
-                    </Picker>
-                    <TextInput placeholder="Costo unitario" value={costo} keyboardType={"decimal-pad"} onChangeText={setCosto} style={styles.inputInferior} placeholderTextColor="#999"/>
                   </View>
                 </View>
                 <TouchableOpacity style={{justifyContent: "center", alignItems: "center"}} onPress={agregarIngrediente}>
                   <Image source={require("../assets/mas.png")} style={{ width: 28, height: 28 }} />
                 </TouchableOpacity>
               </View>
+
               <Text style={styles.TitInput}>Lista ingredientes:</Text>
               <View style={styles.ConLista}>
                 <ScrollView contentContainerStyle={{ paddingVertical: 5 }}>
                   {ListIngr.map(item => (
                     <TouchableOpacity key={item.id} onPress={() => eliminarIngrediente(item.id)}>
-                      <Text style={styles.item}>•{item.clasificacion}: {"\n"}-{item.ingrediente}--[{item.cantidad} {item.unidad}]{"-->"}${item.costo*item.cantidad}</Text>
+                      <Text style={styles.item}>• {item.clasificacion}: {"\n"} - {item.ingrediente} — [{item.cantidad}]</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
               </View>
+
               <View style={{ alignItems: "center", marginTop: 20 }}>
                 {imageUri && (
                   <View style={styles.imageContainer}>
@@ -194,6 +235,7 @@ export default function FormRecetasScreen() {
                   <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
                 </TouchableOpacity>
               </View>
+
               <View style={styles.fila}>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>Calorías:</Text>
@@ -206,10 +248,10 @@ export default function FormRecetasScreen() {
                     <Picker.Item label="Fácil" value="Fácil" />
                     <Picker.Item label="Medio" value="Medio" />
                     <Picker.Item label="Difícil" value="Difícil" />
-                    <Picker.Item label="Muy Difícil" value="Difícil" />
                   </Picker>
                 </View>
               </View>
+
               <View style={styles.fila}>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>No. Personas:</Text>
@@ -220,6 +262,7 @@ export default function FormRecetasScreen() {
                   <TextInput keyboardType={"decimal-pad"} placeholder="Presupuesto" value={presupuesto} onChangeText={setPresupuesto} style={[styles.inputInferior,{width:147}]} placeholderTextColor="#999"/>
                 </View>
               </View>
+
               <TouchableOpacity style={[styles.boton,{top:10}]} onPress={enviar}>
                 <Text style={styles.textoBoton}>Guardar</Text>
               </TouchableOpacity>
