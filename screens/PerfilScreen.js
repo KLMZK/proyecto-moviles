@@ -126,27 +126,47 @@ export default function PerfilScreen() {
       }
     });
   }
-    function editar() {
-    const formData = new FormData();
-    formData.append("id", id);
-    formData.append("nombre", nombre.trim());
-    if(imageUri) formData.append("imagen", {uri: imageUri, type: "image/jpeg", name: `${nombre}_${id}.jpg`});
 
-    fetch(`http://${direccion}/moviles/perfil.php`,{
-      method: 'POST', 
-      headers: {"Content-Type": "multipart/form-data"},
-      body: formData
-    })
-    .then(response => response.json())
-    .then(datos => {
-      if(datos.ingreso == 1) {
-        setModalVisible(false);
-        Alert.alert("Exito","Los cambios se han guardados correctamente.")
-      } else {
-        Alert.alert("Error", "Los cambios no se han guardado correctamente. Intentelo de nuevo")
-      }
+  async function editar() {
+  const formData = new FormData();
+  formData.append("id", id);
+  formData.append("nombre", nombre.trim());
+
+  if (imageUri) {
+    formData.append("imagen", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: `${nombre}_${id}.jpg`,
     });
   }
+  async function actualizarNombreLocal(nuevoNombre) {
+  try {
+    await AsyncStorage.setItem("nombre", nuevoNombre);
+  } catch (error) {
+    console.log("Error al actualizar nombre local", error);
+  }
+}
+  try {
+    const response = await fetch(`http://${direccion}/moviles/perfil.php`, {
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" },
+      body: formData
+    });
+    const datos = await response.json();
+    if (datos.ingreso == 1) {
+      await actualizarNombreLocal(nombre);
+      setImageKey(Date.now());
+      setModalVisible(false);
+      Alert.alert("Éxito", "Los cambios se han guardado correctamente.");
+    } else {
+      Alert.alert("Error", "Los cambios no se pudieron guardar.");
+    }
+  } catch (error) {
+    console.log("Error al editar perfil:", error);
+    Alert.alert("Error", "No se pudo conectar con el servidor.");
+  }
+}
+
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} >

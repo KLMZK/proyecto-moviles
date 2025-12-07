@@ -1,6 +1,6 @@
 import React, {useState,useCallback,useMemo } from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
-import { useNavigation,useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ip from './global';
 
@@ -8,6 +8,7 @@ export default function InicioScreen() {
     const direccion = ip();
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
+    const route = useRoute(); // <-- agregado
     const [categoria, setCategoria] = useState([]);
     const [correo, setCorreo] = useState("");
     const[id, setID]=useState("");
@@ -43,8 +44,25 @@ export default function InicioScreen() {
         return () => { activo = false; };
       }, [direccion])
     );
-    
-        const perfilUri = useMemo(() => {
+
+    // 🔥 Recargar imagen siempre que esta pantalla toma foco
+    useFocusEffect(
+      useCallback(() => {
+        setReloadKey(prev => prev + 1);
+      }, [])
+    );
+
+    // 🔥 Recargar imagen cuando otra pantalla envía imagenActualizada: true
+    useFocusEffect(
+      useCallback(() => {
+        if (route?.params?.imagenActualizada) {
+          setReloadKey(prev => prev + 1);
+          navigation.setParams({ imagenActualizada: false });
+        }
+      }, [route?.params?.imagenActualizada])
+    );
+
+    const perfilUri = useMemo(() => {
       if (nombre && id) {
         return `http://${direccion}/moviles/perfil/${nombre}_${id}.jpg?t=${reloadKey}`;
       }
@@ -57,7 +75,8 @@ export default function InicioScreen() {
         if (hora < 18) return "Buenas tardes";
         return "Buenas noches";
     }
-        const filtrarCategorias = (texto) => {
+
+    const filtrarCategorias = (texto) => {
       setSearchText(texto);
       if (texto.trim() === "") {
         setCategoriaFiltrada(categoria); 
@@ -72,6 +91,7 @@ export default function InicioScreen() {
         setCategoriaFiltrada(filtrado);
       }
     }
+
     const actualizarImagenPerfil = () => {
       setReloadKey(prev => prev + 1);
     }

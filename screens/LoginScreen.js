@@ -33,6 +33,7 @@ export default function LoginScreen() {
           seterror("");
         }
   }
+  
 
   function sesion() {
     const login = {correo: correo.trim(), password: password.trim()}
