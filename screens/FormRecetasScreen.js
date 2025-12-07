@@ -176,9 +176,7 @@ export default function FormRecetasScreen() {
                     ))}
               <TouchableOpacity onPress={agregarPaso} style={[styles.boton,{marginBottom:10}]}>
                 <Text style={styles.textoBoton}>Agregar paso</Text>
-              </TouchableOpacity>
-              <TextInput value={instrucciones} onChangeText={setInstrucciones} placeholder="Instrucciones" style={[styles.input2, { textAlignVertical: "top", height: 100 }]} multiline placeholderTextColor="#999"/>
-              
+              </TouchableOpacity>              
               <Text style={styles.TitInput}>Tipo (filtro ingredientes):</Text>
               <Picker selectedValue={clasificacion} onValueChange={(v) => setClasificacion(v)} style={[styles.input2]}>
                 <Picker.Item label="Todos los tipos" value="" />
@@ -235,7 +233,7 @@ export default function FormRecetasScreen() {
                   <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
                 </TouchableOpacity>
               </View>
-
+              
               <View style={styles.fila}>
                 <View style={styles.columna}>
                   <Text style={styles.TitInput}>Calorías:</Text>

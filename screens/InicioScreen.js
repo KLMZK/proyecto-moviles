@@ -65,7 +65,9 @@ export default function InicioScreen() {
                     <View key={cat.id} style={styles.Etiqueta}>
                         <View style={styles.TitulosEti}>
                             <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
-                            <Text style={styles.vermas}>Ver más</Text>
+                            <TouchableOpacity>
+                                <Text style={styles.vermas}>Ver más</Text>
+                            </TouchableOpacity>
                         </View>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             <View style={styles.ContHorizon}>
