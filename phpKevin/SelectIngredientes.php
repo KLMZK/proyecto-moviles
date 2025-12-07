@@ -6,7 +6,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 include("conexion.php");
 
-$query = "SELECT CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD FROM ingredientes";
+$query = "SELECT NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD FROM ingredientes";
 $result = $conexion->query($query);
 
 $ingredientes = [
@@ -29,8 +29,7 @@ if ($result) {
                 'nombre' => $row['NOMBRE'],
                 'cantidad' => $row['CANTIDAD'],
                 'costo' => ($row['COSTO']*$row['CANTIDAD']),
-                'unidad' => $row['UNIDAD'],
-                'cve_ingrediente' => $row['CVE_INGREDIENTE']
+                'unidad' => $row['UNIDAD']
             ];
         }
     }
