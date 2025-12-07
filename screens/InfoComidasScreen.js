@@ -1,70 +1,102 @@
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import {  View, Text,FlatList , Image, StyleSheet, ImageBackground,ScrollView } from "react-native";
+import {  
+  View, Text, FlatList, Image, StyleSheet, ImageBackground, ScrollView, TouchableOpacity
+} from "react-native";
 import ip from './global';
 
 export default function InfoComidasScreen() {
     const direccion = ip();
     const route = useRoute();
+    const navigation = useNavigation(); // <-- navigation
     const { cve } = route.params;
     const [receta, setReceta] = useState(null);
 
-useEffect(() => {
-    fetch(`http://${direccion}/moviles/Recetas.php?cve=${cve}`)
-        .then(res => res.json())
-        .then(data => {
-            setReceta(data);
-        })
-        .catch(err => console.log(err));
-}, [])
+    useEffect(() => {
+        fetch(`http://${direccion}/moviles/Recetas.php?cve=${cve}`)
+            .then(res => res.json())
+            .then(data => {
+                setReceta(data);
+            })
+            .catch(err => console.log(err));
+    }, []);
 
-  return (
-    <ImageBackground source={require("../assets/Group 1.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-        <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
-        <View style={styles.ImgTitulo}>
-            <View style={styles.ImgPrincipal}>
-                {receta?.IMAGEN && (
-                <Image style={styles.ImgCon} source={{ uri: receta.IMAGEN }} />
-                )}
-            </View>
-            <View style={styles.TitComida}>
-                <Text style={styles.Titulo}>{receta?.NOMBRE}</Text>
-            </View>
-        </View>
-        <View style={styles.ContAbajo}>
-            <View style={styles.MIzq}>
-                <View style={styles.MIzqC}>
-                    <Text style={styles.IzqTitulo}>Ingredientes</Text>
-                    <FlatList
-                    data={receta?.INGREDIENTES}
-                    scrollEnabled={false}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <View style={{ padding: 3, alignSelf:"flex-start"}}>
-                        <Text style={{ fontSize: 16 }}> • {item.NOMBRE} ({item.CANTIDAD} {item.UNIDAD})</Text>
+    const handleEditar = () => {
+        navigation.navigate("FormRecetas", { receta });
+    };
+
+    return (
+        <ImageBackground source={require("../assets/Group 1.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+            <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
+                <View style={styles.ImgTitulo}>
+                    <View style={styles.ImgPrincipal}>
+                        {receta?.IMAGEN && (
+                        <Image style={styles.ImgCon} source={{ uri: receta.IMAGEN }} />
+                        )}
+                    </View>
+                    <View style={styles.TitComida}>
+                        <View style={styles.TituloContainer}>
+                            <Text style={styles.Titulo}>{receta?.NOMBRE}</Text>
+                            {receta && (
+                                <TouchableOpacity onPress={handleEditar}>
+                                    <Image
+                                        source={require("../assets/editar.png")}
+                                        style={styles.IconEditar}
+                                    />
+                                </TouchableOpacity>
+                            )}
                         </View>
-                    )}
-                    />
+                    </View>
                 </View>
-                <View style={styles.MIzqC}>
-                    <Text style={styles.IzqTitulo}>Descripción</Text>
-                    <Text>{receta?.CALORIAS} Kcal</Text>
-                    <Text>Para {receta?.TAMANO} personas</Text>
-                    <Text>Dificultad: {receta?.DIFICULTAD}</Text>
+                <View style={styles.ContAbajo}>
+                    <View style={styles.MIzq}>
+                        <View style={styles.MIzqC}>
+                            <Text style={styles.IzqTitulo}>Ingredientes</Text>
+                            <FlatList
+                                data={receta?.INGREDIENTES}
+                                scrollEnabled={false}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item }) => (
+                                    <View style={{ padding: 3, alignSelf:"flex-start"}}>
+                                        <Text style={{ fontSize: 16 }}> • {item.NOMBRE} ({item.CANTIDAD} {item.UNIDAD})</Text>
+                                    </View>
+                                )}
+                            />
+                        </View>
+                        <View style={styles.MIzqC}>
+                            <Text style={styles.IzqTitulo}>Descripción</Text>
+                            <Text>{receta?.CALORIAS} Kcal</Text>
+                            <Text>Para {receta?.TAMANO} personas</Text>
+                            <Text>Dificultad: {receta?.DIFICULTAD}</Text>
+                            <Text>Presupuesto: ${receta?.PRESUPUESTO}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.MDer}>
+                        <View style={styles.MDerC}>
+                            <Text style={styles.IzqTitulo}>Instrucciones</Text>
+                            <Text>{receta?.DESCRIPCION}</Text>
+                        </View>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.MDer}>
-                <View style={styles.MDerC}>
-                    <Text style={styles.IzqTitulo}>Instrucciones</Text>
-                    <Text>{receta?.DESCRIPCION}</Text>
-                </View>
-            </View>
-        </View>
-        </ScrollView>
-     </ImageBackground>
-  );
+            </ScrollView>
+        </ImageBackground>
+    );
 }
+
 const styles = StyleSheet.create({
+    buttonEditar: {
+        backgroundColor: "#92ad94",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 15,
+        marginTop: 10,
+        alignSelf: "center"
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16
+    },
     MDerC:{
         width:"100%",
         alignSelf:"center",
@@ -104,6 +136,17 @@ const styles = StyleSheet.create({
         fontSize:24,
         fontWeight:"bold",
     },
+    TituloContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+},
+IconEditar: {
+    width: 20,
+    height: 20,
+    resizeMode: "contain",
+},
     TitComida:{
         marginBottom:0,
         paddingBlock:3,
@@ -123,7 +166,6 @@ const styles = StyleSheet.create({
         height:"100%",
         width:"100%",
         borderRadius:35,
-        
     },
     ImgPrincipal:{
         borderRadius:35,
@@ -142,11 +184,9 @@ const styles = StyleSheet.create({
         paddingTop: 30,
         backgroundColor: "#3A4B41",
     },
-
-  backgroundImage: {
-    width: "100%",    
-    height: "100%",   
-    resizeMode: "cover",  
-},
-    
+    backgroundImage: {
+        width: "100%",    
+        height: "100%",   
+        resizeMode: "cover",  
+    },
 });
