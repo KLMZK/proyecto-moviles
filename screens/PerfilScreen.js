@@ -17,7 +17,7 @@ export default function PerfilScreen() {
   const[id, setID]=useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [imageUri, setImageUri] = useState(null);
-  
+  const [imageKey, setImageKey] = useState(Date.now()); 
   
   const navigation = useNavigation();
 
@@ -37,6 +37,7 @@ export default function PerfilScreen() {
     });
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
+      setImageKey(Date.now());
     }
   };
 
@@ -155,7 +156,7 @@ export default function PerfilScreen() {
             <View style={styles.modalContenido}>
               <Text style={[styles.TextPer,{marginTop:0,marginBottom:10,}]}>Editar Perfil</Text>
               <TouchableOpacity style={styles.boton} onPress={pickImage}>
-                <Image source={{ uri: (imageUri || `http://${direccion}/moviles/perfil/${nombre}_${id}.jpg`) + `?t=${Date.now()}`}}  style={styles.modalImagen} resizeMode="contain"/>
+                <Image style={styles.ImgPer} source={{ uri: (imageUri || `http://${direccion}/moviles/perfil/${nombre}_${id}.jpg`) + `?t=${imageKey}` }} />
               </TouchableOpacity>
               <TextInput value={nombre} onChangeText={setNombre} style={styles.TextPer}/>
               <View style={{flexDirection:"row", gap:20,marginTop:20}}>

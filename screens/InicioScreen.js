@@ -1,4 +1,4 @@
-import React, {useState,useEffect,useCallback} from "react";
+import React, {useState,useCallback,useMemo } from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
 import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,10 @@ export default function InicioScreen() {
     const [categoria, setCategoria] = useState([]);
     const [correo, setCorreo] = useState("");
     const[id, setID]=useState("");
+    const [searchText, setSearchText] = useState("");
+    const [categoriaFiltrada, setCategoriaFiltrada] = useState([]);
+    const [reloadKey, setReloadKey] = useState(0);
+
     useFocusEffect(
       useCallback(() => {
         let activo = true;
@@ -29,6 +33,7 @@ export default function InicioScreen() {
             const data = await res.json();
             if (!activo) return;
             setCategoria(data);
+            setCategoriaFiltrada(data);
           } catch (err) {
             console.log(err);
           }
@@ -38,34 +43,62 @@ export default function InicioScreen() {
         return () => { activo = false; };
       }, [direccion])
     );
+    
+        const perfilUri = useMemo(() => {
+      if (nombre && id) {
+        return `http://${direccion}/moviles/perfil/${nombre}_${id}.jpg?t=${reloadKey}`;
+      }
+      return null;
+    }, [nombre, id, direccion, reloadKey]);
+
     function saludoSegunHora() {
         const hora = new Date().getHours();
         if (hora < 12) return "Buenos días";
         if (hora < 18) return "Buenas tardes";
         return "Buenas noches";
     }
+        const filtrarCategorias = (texto) => {
+      setSearchText(texto);
+      if (texto.trim() === "") {
+        setCategoriaFiltrada(categoria); 
+      } else {
+        const textoMinus = texto.toLowerCase();
+        const filtrado = categoria.map(cat => {
+          const recetasFiltradas = cat.recetas.filter(rec =>
+            rec.nombreRecetas.toLowerCase().includes(textoMinus)
+          );
+          return { ...cat, recetas: recetasFiltradas };
+        }).filter(cat => cat.recetas.length > 0); 
+        setCategoriaFiltrada(filtrado);
+      }
+    }
+    const actualizarImagenPerfil = () => {
+      setReloadKey(prev => prev + 1);
+    }
     
     return (
         <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
         <View style={styles.Saludo}>
-            <Image source={{ uri: (`http://${direccion}/moviles/perfil/${nombre}_${id}.jpg`) + "?t=" + Date.now() }} style={styles.ImgSaludo}/>
+            {perfilUri && (
+              <Image source={{ uri: perfilUri }} style={styles.ImgSaludo}/>
+            )}
             <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
             <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}!</Text>
         </View>
         <View style={styles.InputContenedor}>
             <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
-            <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999"/>
+            <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999" value={searchText} onChangeText={filtrarCategorias}/>
             <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormRecetas')}>
                 <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
             </TouchableOpacity>
         </View>
         <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
             <View style={styles.contenido}>
-                {categoria.map(cat => (
+                {categoriaFiltrada.map(cat => (
                     <View key={cat.id} style={styles.Etiqueta}>
                         <View style={styles.TitulosEti}>
                             <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate("VerMas", { categoriaId: cat.id, categoriaNombre: cat.nombreCategoria })}>
                                 <Text style={styles.vermas}>Ver más</Text>
                             </TouchableOpacity>
                         </View>
