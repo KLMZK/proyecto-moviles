@@ -62,8 +62,7 @@ if (!file_exists($upload_dir)) {
 $rutaImagen = "";  
 
 if (isset($_FILES["imagen"])) {
-    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $nombre);
-    $nombre_archivo = $nombre_limpio."_" . $idReceta . ".jpg";
+    $nombre_archivo = $nombre."_" . $idReceta . ".jpg";
     $guardar_en = $upload_dir . $nombre_archivo;
 
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {
