@@ -1,6 +1,6 @@
-import React, {useState,useEffect} from "react";
+import React, {useState,useEffect,useCallback} from "react";
 import { TouchableOpacity, ScrollView, View, Text, TextInput, Image, StyleSheet, ImageBackground } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ip from './global';
 
@@ -9,12 +9,25 @@ export default function InicioScreen() {
     const [nombre, setNombre] = useState("");
     const navigation = useNavigation();
     const [categoria, setCategoria] = useState([]);
+      const [correo, setCorreo] = useState("");
+      const[id, setID]=useState("");
 
-    useEffect(() => {
+
+    useFocusEffect(
+            useCallback(() => {
         async function cargarNombre() {
             const nombreGuardado = await AsyncStorage.getItem("nombre");
             if (nombreGuardado) setNombre(nombreGuardado);
         }
+        async function cargarCorreo() {
+            const correoGuardado = await AsyncStorage.getItem("correo");
+            if (correoGuardado) setCorreo(correoGuardado);
+            }
+        async function cargarID() {
+            const IDGuardado = await AsyncStorage.getItem("id");
+            if (IDGuardado) setID(IDGuardado);
+        }
+    
 
         async function consulta() {
             fetch(`http://${direccion}/moviles/Select.php`)
@@ -22,24 +35,25 @@ export default function InicioScreen() {
                 .then(data => setCategoria(data))
                 .catch(err => console.log(err));
         }
-
+        cargarCorreo();
+        cargarID();
         cargarNombre();
         consulta();
-    }, []);
-
+    }, [])
+);
     function saludoSegunHora() {
         const hora = new Date().getHours();
         if (hora < 12) return "Buenos días";
         if (hora < 18) return "Buenas tardes";
         return "Buenas noches";
     }
-
+    
     return (
         <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
         <View style={styles.Saludo}>
-            <Image source={require("../assets/usuario.png")} style={styles.ImgSaludo}/>
+            <Image source={{ uri: (`http://${direccion}/moviles/perfil/${nombre}_${id}.jpg`) + "?t=" + Date.now() }} style={styles.ImgSaludo}/>
             <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
-            <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}</Text>
+            <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}!</Text>
         </View>
         <View style={styles.InputContenedor}>
             <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
@@ -52,7 +66,6 @@ export default function InicioScreen() {
             <View style={styles.contenido}>
                 {categoria.map(cat => (
                     <View key={cat.id} style={styles.Etiqueta}>
-                        
                         <View style={styles.TitulosEti}>
                             <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
                             <Text style={styles.vermas}>Ver más</Text>
@@ -60,20 +73,14 @@ export default function InicioScreen() {
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             <View style={styles.ContHorizon}>
                                 {cat.recetas.map(rec => (
-                                    <TouchableOpacity
-                                        key={rec.idReceta}
-                                        style={styles.ImgContenedor}
-                                        onPress={() => navigation.navigate("InfoComidas", { data: rec })}
-                                    >
-                                        <Image style={styles.ImgCon} source={{ uri: rec.imagen }}/>
+                                    <TouchableOpacity key={rec.idReceta} style={styles.ImgContenedor} onPress={() => navigation.navigate("InfoComidas", { data: rec })}>
+                                        <Image style={{width: 160, height: 130, borderRadius: 20}} source={{ uri:rec.imagen}}/>
                                         <View style={styles.info}>
                                             <Text style={styles.infoTitulo}>{rec.nombreRecetas}</Text>
-
                                             <View style={styles.infoContenido}>
                                                 <Text style={styles.detalles}>{rec.calorias} Kcal</Text>
                                                 <Text style={styles.detalles}>{rec.tamano} Personas</Text>
                                             </View>
-
                                             <View style={styles.infoContenido}>
                                                 <Text style={styles.detalles}>{rec.ingredientes} Ing.</Text>
                                                 <Text style={styles.detalles}>{rec.dificultad}</Text>
@@ -81,16 +88,12 @@ export default function InicioScreen() {
                                         </View>
                                     </TouchableOpacity>
                                 ))}
-
                             </View>
                         </ScrollView>
-
                     </View>
                 ))}
-
             </View>
         </ScrollView>
-
         </ImageBackground>
     );
 }
@@ -121,7 +124,8 @@ const styles = StyleSheet.create({
         flexDirection:"row",
     },
     ImgCon:{
-        width:"100%"
+        width:10,
+        height:10,
     },
     Etiqueta:{
         width:"100%",
@@ -192,6 +196,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         alignSelf:"center",
         paddingBlock:20, 
+        fontWeight:"bold"
     }, 
     Saludo: {
         marginBlock:10,
@@ -201,11 +206,12 @@ const styles = StyleSheet.create({
     },
     
     ImgSaludo: {
-        width: "70%",    
-        height: "70%",   
+        borderRadius:100,
+        width: 80,    
+        height: 80,   
         resizeMode: "contain",
         position: "absolute",
-        right:200,
+        right:300,
         bottom: 30,     
     }, 
     

@@ -49,6 +49,7 @@ export default function LoginScreen() {
       if(datos.ingreso === 1) {
        guardarUsuario(datos["0"].NOMBRE);
        guardarCorreo(datos["0"].CORREO);
+       guardarID(datos["0"].CVE_USUARIO);
        navigation.navigate('HomeTabs');
       } else {
         seterror("Contraseña Incorrecta");
@@ -73,6 +74,13 @@ export default function LoginScreen() {
       console.log("Error al guardar el correo", error);
     }
   };
+  async function guardarID(id) {
+  try {
+    await AsyncStorage.setItem("id", id.toString());
+  } catch (error) {
+    console.log("Error al guardar el ID", error);
+  }
+}
 
   return (
     <ImageBackground source={require("../assets/Fondo.png")} style={styles.background} imageStyle={styles.backgroundImage}>
