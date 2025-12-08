@@ -96,58 +96,58 @@ export default function InicioScreen() {
       setReloadKey(prev => prev + 1);
     }
     
-    return (
-        <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
-        <View style={styles.Saludo}>
-            {perfilUri && (
-              <Image source={{ uri: perfilUri }} style={styles.ImgSaludo}/>
-            )}
-            <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
-            <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}!</Text>
-        </View>
-        <View style={styles.InputContenedor}>
-            <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
-            <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999" value={searchText} onChangeText={filtrarCategorias}/>
-            <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormRecetas')}>
-                <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
-            </TouchableOpacity>
-        </View>
-        <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
-            <View style={styles.contenido}>
-                {categoriaFiltrada.map(cat => (
-                    <View key={cat.id} style={styles.Etiqueta}>
-                        <View style={styles.TitulosEti}>
-                            <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
-                            <TouchableOpacity onPress={() => navigation.navigate("VerMas", { categoriaId: cat.id, categoriaNombre: cat.nombreCategoria })}>
-                                <Text style={styles.vermas}>Ver más</Text>
-                            </TouchableOpacity>
+  return (
+    <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
+      <View style={styles.Saludo}>
+        {perfilUri && (
+          <Image source={{ uri: perfilUri }} style={styles.ImgSaludo}/>
+        )}
+        <Text style={styles.TextSaludo}>{saludoSegunHora()}</Text>
+        <Text style={[styles.TextSaludo,{paddingBlock:0, bottom:15}]}>{nombre}!</Text>
+      </View>
+      <View style={styles.InputContenedor}>
+        <Image source={require("../assets/busqueda.png")} style={styles.icon}/>
+        <TextInput placeholder="Buscar" style={styles.input} placeholderTextColor="#999" value={searchText} onChangeText={filtrarCategorias}/>
+        <TouchableOpacity style={styles.btnMas} onPress={() => navigation.navigate('FormRecetas')}>
+          <Image source={require("../assets/mas.png")} style={styles.iconMas}/>
+        </TouchableOpacity>
+      </View>
+      <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 80 }}>
+        <View style={styles.contenido}>
+          {categoriaFiltrada.map(cat => (
+            <View key={cat.id} style={styles.Etiqueta}>
+              <View style={styles.TitulosEti}>
+                <Text style={styles.DesTitulo}>{cat.nombreCategoria}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("VerMas", { categoriaId: cat.id, categoriaNombre: cat.nombreCategoria })}>
+                  <Text style={styles.vermas}>Ver más</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.ContHorizon}>
+                  {cat.recetas.map(rec => (
+                    <TouchableOpacity key={`${rec.idReceta}-${reloadKey}`} style={styles.ImgContenedor} onPress={() => navigation.navigate("InfoComidas", { cve: rec.idReceta })}>
+                      <Image style={{width: 160, height: 130, borderRadius: 20}} source={{ uri: `${rec.imagen}?t=${reloadKey}` }}/>
+                      <View style={styles.info}>
+                        <Text style={styles.infoTitulo}>{rec.nombreRecetas}</Text>
+                        <View style={styles.infoContenido}>
+                          <Text style={styles.detalles}>{rec.calorias} Kcal</Text>
+                          <Text style={styles.detalles}>{rec.tamano} Personas</Text>
                         </View>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                            <View style={styles.ContHorizon}>
-                                {cat.recetas.map(rec => (
-                                    <TouchableOpacity key={rec.idReceta} style={styles.ImgContenedor} onPress={() => navigation.navigate("InfoComidas", { cve: rec.idReceta })}>
-                                        <Image style={{width: 160, height: 130, borderRadius: 20}} source={{ uri:rec.imagen}}/>
-                                        <View style={styles.info}>
-                                            <Text style={styles.infoTitulo}>{rec.nombreRecetas}</Text>
-                                            <View style={styles.infoContenido}>
-                                                <Text style={styles.detalles}>{rec.calorias} Kcal</Text>
-                                                <Text style={styles.detalles}>{rec.tamano} Personas</Text>
-                                            </View>
-                                            <View style={styles.infoContenido}>
-                                                <Text style={styles.detalles}>{rec.ingredientes} Ing.</Text>
-                                                <Text style={styles.detalles}>{rec.dificultad}</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </ScrollView>
-                    </View>
-                ))}
+                        <View style={styles.infoContenido}>
+                          <Text style={styles.detalles}>{rec.ingredientes} Ing.</Text>
+                          <Text style={styles.detalles}>{rec.dificultad}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
-        </ScrollView>
-        </ImageBackground>
-    );
+          ))}
+        </View>
+      </ScrollView>   
+    </ImageBackground>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,5 @@
 import { useRoute, useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {  
   View, Text, FlatList, Image, StyleSheet, ImageBackground, ScrollView, TouchableOpacity
 } from "react-native";
@@ -8,18 +8,24 @@ import ip from './global';
 export default function InfoComidasScreen() {
     const direccion = ip();
     const route = useRoute();
-    const navigation = useNavigation(); // <-- navigation
+    const navigation = useNavigation();
     const { cve } = route.params;
     const [receta, setReceta] = useState(null);
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
         fetch(`http://${direccion}/moviles/Recetas.php?cve=${cve}`)
             .then(res => res.json())
-            .then(data => {
-                setReceta(data);
-            })
+            .then(data => setReceta(data))
             .catch(err => console.log(err));
-    }, []);
+    }, [cve, direccion, reloadKey]);
+
+
+    useEffect(() => {
+      if (receta?.IMAGEN) {
+        Image.prefetch(`${receta.IMAGEN}?t=${reloadKey}`);
+      }
+    }, [receta, reloadKey]);
 
     const handleEditar = () => {
         navigation.navigate("FormRecetas", { receta });
@@ -31,7 +37,11 @@ export default function InfoComidasScreen() {
                 <View style={styles.ImgTitulo}>
                     <View style={styles.ImgPrincipal}>
                         {receta?.IMAGEN && (
-                        <Image style={styles.ImgCon} source={{ uri: receta.IMAGEN }} />
+                          <Image
+                            key={reloadKey}
+                            style={styles.ImgCon}
+                            source={{ uri: `${receta.IMAGEN}?t=${reloadKey}` }}
+                          />
                         )}
                     </View>
                     <View style={styles.TitComida}>
@@ -82,6 +92,7 @@ export default function InfoComidasScreen() {
         </ImageBackground>
     );
 }
+
 
 const styles = StyleSheet.create({
     buttonEditar: {
