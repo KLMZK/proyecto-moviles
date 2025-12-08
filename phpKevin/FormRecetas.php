@@ -38,24 +38,19 @@ if (mysqli_query($conexion, $sql)) {
     mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta')");
 
     foreach ($ingrediente as $ing) {
-        $cantidad = $ing['cantidad'] ?? 0;
-        $costo = $ing['costo'] ?? 0;
-        $unidad = $ing['unidad'] ?? '';
-        $clasificacion = $ing['clasificacion'] ?? '';
+        $nomIngr = $ing['ingrediente'];
+        $cantidad = $ing['cantidad'];
+        $costo = $ing['costo']?? 0;
+        $unidad = $ing['unidad']?? '';
+        $clasificacion = $ing['clasificacion']??'';
+        mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD)
+                             VALUES ('', '$nomIngr', '','$costo','$clasificacion','$unidad')");
+        $idIngr = mysqli_insert_id($conexion);
+        mysqli_query($conexion,"INSERT INTO utiliza (CVE_INGREDIENTE,CVE_RECETA,CANTIDAD)
+                                    VALUES ('$idIngr','$idReceta','$cantidad')");
+    }
 
-        if (!empty($ing['cve_ingrediente'])) {
-            $idIngr = $conexion->real_escape_string($ing['cve_ingrediente']);
-        } else {
-            $nomIngr = $conexion->real_escape_string($ing['ingrediente'] ?? '');
-            mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD)
-                                 VALUES ('', '$nomIngr', '', '$costo', '$clasificacion', '$unidad')");
-            $idIngr = mysqli_insert_id($conexion);
-        }
-        mysqli_query($conexion, "INSERT INTO utiliza (CVE_INGREDIENTE, CVE_RECETA, CANTIDAD)
-                                 VALUES ('$idIngr', '$idReceta', '$cantidad')");
-     }
- 
-     echo json_encode(["ingreso" => 1]);
+    echo json_encode(["ingreso" => 1]);
 } else {
     echo json_encode(["ingreso" => 0]);
 }
@@ -67,8 +62,7 @@ if (!file_exists($upload_dir)) {
 $rutaImagen = "";  
 
 if (isset($_FILES["imagen"])) {
-    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $nombre);
-    $nombre_archivo = $nombre_limpio."_" . $idReceta . ".jpg";
+    $nombre_archivo = $nombre."_" . $idReceta . ".jpg";
     $guardar_en = $upload_dir . $nombre_archivo;
 
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {
