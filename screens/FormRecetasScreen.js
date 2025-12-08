@@ -127,7 +127,7 @@ export default function FormRecetasScreen() {
 
 function enviar() {
   const formData = new FormData();
-  const accion = receta ? "editar" : "agregar";
+  const accion = receta ? "editar" : "guardar";
   formData.append("accion", accion);
 
   if (receta?.CVE_RECETA) {
@@ -237,6 +237,7 @@ function enviar() {
               <View style={{ flexDirection: "row", width: "100%", alignItems: "flex-start", marginTop: 5 }}>
                 <TextInput
                   placeholder="Cantidad"
+                  keyboardType="decimal-pad"
                   value={cantidad}
                   onChangeText={setCantidad}
                   style={[styles.input2,{left:18, bottom:10,width:280}]}
@@ -273,7 +274,7 @@ function enviar() {
               </View>
 
               <View style={styles.fila}>
-                <TextInput style={[styles.inputInferior, {flex:1}]} placeholder="Calorías" value={calorias} onChangeText={setCalorias}/>
+                <TextInput style={[styles.inputInferior, {flex:1}]} keyboardType="decimal-pad" placeholder="Calorías" value={calorias} onChangeText={setCalorias}/>
                 <Picker selectedValue={dificultad} onValueChange={setDificultad} style={[styles.inputInferior, {flex:1}]}>
                   <Picker.Item label="Dificultad" value=""/>
                   <Picker.Item label="Fácil" value="Fácil"/>
@@ -283,8 +284,8 @@ function enviar() {
               </View>
 
               <View style={styles.fila}>
-                <TextInput style={[styles.inputInferior, {flex:1}]} placeholder="Personas" value={personas} onChangeText={setPersonas}/>
-                <TextInput style={[styles.inputInferior, {flex:1}]} placeholder="Presupuesto" value={presupuesto} onChangeText={setPresupuesto}/>
+                <TextInput style={[styles.inputInferior, {flex:1}]} keyboardType="decimal-pad" placeholder="Personas" value={personas} onChangeText={setPersonas}/>
+                <TextInput style={[styles.inputInferior, {flex:1}]} placeholder="Presupuesto" keyboardType="decimal-pad" value={presupuesto} onChangeText={setPresupuesto}/>
               </View>
 
               <TouchableOpacity style={[styles.boton, {top:10}]} onPress={enviar}>

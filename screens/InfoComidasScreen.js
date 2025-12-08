@@ -95,98 +95,6 @@ export default function InfoComidasScreen() {
 
 
 const styles = StyleSheet.create({
-    buttonEditar: {
-        backgroundColor: "#92ad94",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 15,
-        marginTop: 10,
-        alignSelf: "center"
-    },
-    buttonText: {
-        color: "white",
-        fontWeight: "bold",
-        fontSize: 16
-    },
-    MDerC:{
-        width:"100%",
-        alignSelf:"center",
-        padding:10,
-        backgroundColor:"rgba(217, 217, 217, 0.7)",
-        borderRadius:20,
-    },
-    IzqTitulo:{
-        alignSelf:"center",
-        paddingBottom:10,
-        fontSize:18,
-        fontWeight:"bold",
-    },
-    MIzqC:{
-        width:"45%",
-        margin:10,
-        padding:10,
-        backgroundColor:"rgba(217, 217, 217, 0.7)",
-        alignItems:"center",
-        borderRadius:20,
-    },
-    MDer:{
-        width:400,
-        alignSelf:"center",
-    },
-    MIzq:{
-        alignSelf:"center",
-        flexDirection:"row",
-        width:400,
-    },
-    ContAbajo:{
-        marginTop:15,
-        flexDirection:"column",
-        width:"100%",
-    },
-    Titulo:{
-        fontSize:24,
-        fontWeight:"bold",
-    },
-    TituloContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-},
-IconEditar: {
-    width: 20,
-    height: 20,
-    resizeMode: "contain",
-},
-    TitComida:{
-        marginBottom:0,
-        paddingBlock:3,
-        borderRadius:13,
-        alignSelf:"center",
-        height:"10%",
-        width:"60%",
-        alignItems:"center",
-        backgroundColor:"rgba(217, 217, 217, 0.89)",
-    },
-    ImgTitulo:{
-        height:450,
-        marginTop:60,
-        width:"100%"
-    },
-    ImgCon:{
-        height:"100%",
-        width:"100%",
-        borderRadius:35,
-    },
-    ImgPrincipal:{
-        borderRadius:35,
-        padding:20,
-        height:"90%",
-        marginLeft:20,
-        marginRight:20,
-        alignItems:"center",
-        backgroundColor:"#EDEDED"
-    },
     background: {
         flex: 1,
         width: "100%",
@@ -199,5 +107,104 @@ IconEditar: {
         width: "100%",    
         height: "100%",   
         resizeMode: "cover",  
+    },
+    ImgTitulo: {
+        marginTop: 60,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    ImgPrincipal: {
+        width: "90%",
+        height: 300, // altura proporcional
+        borderRadius: 35,
+        padding: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#EDEDED",
+        marginBottom: 15,
+    },
+    ImgCon: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 35,
+    },
+    TitComida: {
+        width: "80%",
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 13,
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        backgroundColor: "rgba(217, 217, 217, 0.89)",
+        marginBottom: 10,
+    },
+    TituloContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        flexWrap: "wrap", // permite que el título haga wrap
+        gap: 10,
+    },
+    Titulo: {
+        fontSize: 24,
+        fontWeight: "bold",
+        textAlign: "center",
+        flexShrink: 1,
+    },
+    IconEditar: {
+        width: 24,
+        height: 24,
+        resizeMode: "contain",
+    },
+    ContAbajo: {
+        marginTop: 15,
+        width: "100%",
+        flexDirection: "column",
+        alignItems: "center",
+    },
+    MIzq: {
+        flexDirection: "row",
+        width: "90%",
+        justifyContent: "space-between",
+        marginBottom: 15,
+    },
+    MIzqC: {
+        width: "45%",
+        margin: 5,
+        padding: 10,
+        alignItems: "center",
+        backgroundColor: "rgba(217, 217, 217, 0.7)",
+        borderRadius: 20,
+    },
+    MDer: {
+        width: "90%",
+        marginBottom: 15,
+    },
+    MDerC: {
+        width: "100%",
+        padding: 10,
+        backgroundColor: "rgba(217, 217, 217, 0.7)",
+        borderRadius: 20,
+    },
+    IzqTitulo: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    buttonEditar: {
+        backgroundColor: "#92ad94",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 15,
+        marginTop: 10,
+        alignSelf: "center",
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16,
     },
 });
