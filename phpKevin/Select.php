@@ -45,8 +45,6 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
     if ($row["idRecetas"] != null) {
-        $nombre_archivo = $nombre_receta_sanitizado . "_" . $row["idRecetas"] . ".jpg";
-        $imagen = $base_url . $nombre_archivo;
         $categorias[$id]["recetas"][] = [
             "idReceta" => $row["idRecetas"],
             "nombreRecetas" => $row["nombreRecetas"],
