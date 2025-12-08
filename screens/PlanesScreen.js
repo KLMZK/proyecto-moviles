@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from "react";
 import { TouchableOpacity, ScrollView, View, Text, Image, StyleSheet, ImageBackground, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from "@react-navigation/native";
@@ -22,14 +24,38 @@ const DAY_NAMES = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','D
 export default function RecetaScreen() {
   const navigation = useNavigation();
   const direccion = ip();
-
+ 
+  // recargar al obtener foco (cuando seleccionas la pestaña / vuelves a la pantalla)
+  useFocusEffect(
+    useCallback(() => {
+      fetchAgenda();
+      fetchRecipes();
+      fetchWeeklyTotals();
+      fetchClassifications();
+      // no cleanup necesario
+    }, [weekRange])
+  );
+  
   const [period, setPeriod] = useState('current');
   const [agendaItems, setAgendaItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recipes, setRecipes] = useState([]);
   const [showAdd, setShowAdd] = useState({});
   const [selectedRecipe, setSelectedRecipe] = useState({});
-
+  const [classifications, setClassifications] = useState([]); // lista de clasificaciones
+  const [selectedClass, setSelectedClass] = useState({});     // map fecha -> clasificacion seleccionada
+  const [weeklyTotals, setWeeklyTotals] = useState([]);
+  
+  async function fetchClassifications() {
+    try {
+      const res = await fetch(`http://${direccion}/moviles/SelectCategorias.php`);
+      const data = await res.json();
+      setClassifications(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error cargando clasificaciones:", err);
+    }
+  }
+  
   const weekRange = useMemo(() => {
     const today = new Date();
     const base = startOfWeek(today);
@@ -40,12 +66,14 @@ export default function RecetaScreen() {
     end.setDate(end.getDate() + 6);
     return { start, end };
   }, [period]);
-
+  
   useEffect(() => {
     fetchAgenda();
     fetchRecipes();
+    fetchWeeklyTotals(); // obtiene resumen al montar / cambiar semana
+    fetchClassifications();
   }, [weekRange]);
-
+  
   async function fetchRecipes() {
     try {
       const res = await fetch(`http://${direccion}/moviles/SelectRecetas.php`);
@@ -69,6 +97,18 @@ export default function RecetaScreen() {
       Alert.alert('Error','No se pudo cargar la agenda');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchWeeklyTotals() {
+    try {
+      const start = formatDate(weekRange.start);
+      const end = formatDate(weekRange.end);
+      const res = await fetch(`http://${direccion}/moviles/SelectWeeklyIngredients.php?start=${start}&end=${end}`);
+      const data = await res.json();
+      setWeeklyTotals(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error cargando totales semanales:", err);
     }
   }
 
@@ -131,6 +171,7 @@ export default function RecetaScreen() {
 
   async function Preparado(item) {
     const nuevo = item.preparado == 1 ? 0 : 1;
+    // optimista
     setAgendaItems(prev => prev.map(p => p.CVE_AGENDA === item.CVE_AGENDA ? {...p, preparado: nuevo} : p));
     try {
       const res = await fetch(`http://${direccion}/moviles/Preparado.php`, {
@@ -140,14 +181,23 @@ export default function RecetaScreen() {
       });
       const json = await res.json();
       if (!json || json.estado != 1) {
-        throw new Error('no actualizado');
+        // revertir y mostrar mensaje del servidor
+        setAgendaItems(prev => prev.map(p => p.CVE_AGENDA === item.CVE_AGENDA ? {...p, preparado: item.preparado} : p));
+        const mensaje = json && json.mensaje ? json.mensaje : 'No se pudo actualizar';
+        Alert.alert('Error', mensaje);
+      } else {
+        // recargar agenda y totales para reflejar los ingredientes actualizados
+        await fetchAgenda();
+        await fetchWeeklyTotals();
       }
     } catch (err) {
+      console.error(err);
       setAgendaItems(prev => prev.map(p => p.CVE_AGENDA === item.CVE_AGENDA ? {...p, preparado: item.preparado} : p));
-      Alert.alert('Error','No se pudo actualizar el estado');
+      Alert.alert('Error','No se pudo conectar al servidor');
     }
   }
-
+  
+  // render — al final de la vista de semanas muestra el resumen
   return (
     <ImageBackground source={require("../assets/FondoPantallas.png")} style={styles.background} imageStyle={styles.backgroundImage}>
       <View style={styles.Saludo}>
@@ -178,11 +228,28 @@ export default function RecetaScreen() {
               </View>
 
               { showAdd[day.fecha] && (
-                <View style={styles.addPanel}>
+                <View style={[styles.addPanel,{ marginBottom: 12 }]}>
                   <View style={styles.addCard}>
+                    {/* Picker de clasificación (filtra recetas) */}
+                    <Picker
+                      selectedValue={selectedClass[day.fecha] ?? ""}
+                      onValueChange={(v) => setSelectedClass(prev => ({ ...prev, [day.fecha]: v }))}
+                    >
+                      <Picker.Item label="Todas las clasificaciones" value="" />
+                      {classifications.map(c => <Picker.Item key={c.CVE_CATEGORIA} label={c.NOMBRE} value={c.CVE_CATEGORIA} />)}
+                    </Picker>
+
+                    {/* Picker de recetas filtrado por clasificación */}
                     <Picker selectedValue={selectedRecipe[day.fecha] ?? ""} onValueChange={(v) => setSelectedRecipe(prev => ({ ...prev, [day.fecha]: v }))}>
                       <Picker.Item label="Seleccionar receta" value="" />
-                      {recipes.map(r => <Picker.Item key={r.CVE_RECETA} label={`${r.NOMBRE}`} value={r.CVE_RECETA} />)}
+                      {recipes
+                        .filter(r => {
+                          const sel = selectedClass[day.fecha];
+                          if (!sel || sel === '') return true;
+                          // Si SelectRecetas.php no devuelve CVE_CATEGORIA, no se filtrará.
+                          return r.CVE_CATEGORIA == sel || r.cve_categoria == sel || r.CVE_CATEGORIA === sel;
+                        })
+                        .map(r => <Picker.Item key={r.CVE_RECETA} label={`${r.NOMBRE}`} value={r.CVE_RECETA} />)}
                     </Picker>
                     <TouchableOpacity style={[styles.boton, { marginTop: 8 }]} onPress={() => addToAgenda(day.fecha)}>
                       <Text style={styles.textoBoton}>Agregar</Text>
@@ -226,6 +293,26 @@ export default function RecetaScreen() {
             </View>
           ))}
         </View>
+
+        {/* RESUMEN SEMANAL: lista de ingredientes usados esa semana */}
+        <View style={{ width: '95%', marginTop: 16, marginLeft:10, padding: 12, backgroundColor: '#fff', borderRadius: 12 }}>
+          <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Resumen de ingredientes (semana)</Text>
+          {weeklyTotals.length === 0 ? (
+            <Text style={{ color: '#666' }}>No hay ingredientes para esta semana</Text>
+          ) : weeklyTotals.map(i => (
+            <View key={i.CVE_INGREDIENTE} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: '600' }}>{i.NOMBRE} {i.UNIDAD ? `(${i.UNIDAD})` : ''}</Text>
+                <Text style={{ color: '#666', fontSize: 12 ,width:130}}>Necesario: {i.total_necesario} Disponible: {i.disponible}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontWeight: '600' }}>Faltante: {i.faltante}</Text>
+                <Text style={{ color: '#c33' }}>Costo faltante: ${Number(i.costo_faltante).toFixed(2)}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
       </ScrollView>
     </ImageBackground>
   );
@@ -261,20 +348,19 @@ const styles = StyleSheet.create({
   infoContenido:{ flexDirection:'row', justifyContent:'space-between', marginTop:6 },
   detalles:{ fontSize:12, color:'#444' },
   EmptyCard:{ width:180, marginLeft:20, height:160, borderRadius:12, justifyContent:'center', alignItems:'center', backgroundColor:'#f2f2f2' },
-  emptyText:{ color:'#666' },
-  prepBtn:{ paddingHorizontal:12, paddingVertical:6, borderRadius:12 },
-  prepBtnOn:{ backgroundColor:'#7fbf7f' },
-  prepBtnOff:{ backgroundColor:'#ddd' },
-  prepText:{ color:'#fff', fontWeight:'bold' },
-
-  Saludo:{ bottom:30, width:"100%", height:"14%", alignItems:"center" },
-  ImgSaludo2:{ alignSelf:"flex-end", left:240, width:"60%", height:"60%", resizeMode:"contain", position:"absolute", top:30 },
-  ImgSaludo:{ width:"60%", height:"60%", resizeMode:"contain", position:"absolute", right:240, top:30 },
-  background:{ flex:1, width:"100%", height:"100%", alignItems:"center", paddingTop:30, backgroundColor:"#3A4B41" },
-  backgroundImage:{ width:"100%", height:"100%", resizeMode:"contain", position:"absolute", top:-40 },
-  InputContenedor:{ flexDirection: "row", alignItems: "center", paddingHorizontal: 10, width: "90%", height:70, backgroundColor: "#f1f1f1", borderRadius: 20 },
-  addPanel:{ width: '100%', backgroundColor: '#fff', borderRadius: 8, padding: 8, marginTop: 8 },
-  addCard:{ flexDirection: 'column', },
-  addToggle:{ padding: 8, borderRadius: 16, backgroundColor: '#5cb85c', alignSelf: 'flex-end' },
   addToggleText:{ color: '#fff', fontWeight: 'bold' },
+  addToggle:{ padding: 8, borderRadius: 16, backgroundColor: '#5cb85c', alignSelf: 'flex-end' },
+  addCard:{ flexDirection: 'column', },
+  addPanel:{ width: '100%', backgroundColor: '#fff', borderRadius: 8, padding: 8, marginTop: 8 },
+  InputContenedor:{ flexDirection: "row", alignItems: "center", paddingHorizontal: 10, width: "90%", height:70, backgroundColor: "#f1f1f1", borderRadius: 20 },
+  backgroundImage:{ width:"100%", height:"100%", resizeMode:"contain", position:"absolute", top:-40 },
+  background:{ flex:1, width:"100%", height:"100%", alignItems:"center", paddingTop:30, backgroundColor:"#3A4B41" },
+  ImgSaludo:{ width:"60%", height:"60%", resizeMode:"contain", position:"absolute", right:240, top:30 },
+  ImgSaludo2:{ alignSelf:"flex-end", left:240, width:"60%", height:"60%", resizeMode:"contain", position:"absolute", top:30 },
+  Saludo:{ bottom:30, width:"100%", height:"14%", alignItems:"center" },
+  prepText:{ color:'#fff', fontWeight:'bold' },
+  prepBtnOff:{ backgroundColor:'#ddd' },
+  prepBtnOn:{ backgroundColor:'#7fbf7f' },
+  prepBtn:{ paddingHorizontal:12, paddingVertical:6, borderRadius:12 },
+  emptyText:{ color:'#666' },
 });
