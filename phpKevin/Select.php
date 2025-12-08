@@ -5,7 +5,8 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
 
 include("conexion.php");
-$ip = $_SERVER['SERVER_ADDR'];
+$server_ip = $_SERVER['SERVER_ADDR'];
+$base_url = "http://$server_ip/moviles/uploads/";
 
 $sql = "
 SELECT 
@@ -54,7 +55,7 @@ while ($row = $result->fetch_assoc()) {
             "dificultad" => $row["dificultad"],
             "tamano" => $row["tamano"],
             "ingredientes" => $row["ingredientes"],
-            "imagen" => "http://".$ip."/moviles/uploads/".$row["nombreRecetas"]."_".$row["idRecetas"].".jpg"
+            "imagen" => $imagen_url
         ];
     }
 }
