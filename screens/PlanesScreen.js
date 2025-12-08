@@ -125,7 +125,9 @@ export default function RecetaScreen() {
       if (json.estado == 1) {
         setShowAdd(prev => ({ ...prev, [fecha]: false }));
         setSelectedRecipe(prev => ({ ...prev, [fecha]: undefined }));
-        fetchAgenda();
+        // recargar agenda y totales (ingredientes) para que la zona de ingredientes se actualice
+        await fetchAgenda();
+        await fetchWeeklyTotals();
       } else {
         Alert.alert('Error','No se pudo agregar a la agenda');
       }
@@ -144,7 +146,8 @@ export default function RecetaScreen() {
       });
       const json = await res.json();
       if (json.estado == 1) {
-        fetchAgenda();
+        await fetchAgenda();           // esperar recarga de agenda
+        await fetchWeeklyTotals();     // recargar totales para actualizar zona de ingredientes
       } else {
         Alert.alert('Error','No se pudo eliminar');
       }
@@ -153,7 +156,7 @@ export default function RecetaScreen() {
       Alert.alert('Error','No se pudo conectar al servidor');
     }
   }
-
+  
   const days = useMemo(() => {
     const daysArr = [];
     for (let i = 0; i < 7; i++) {
@@ -230,7 +233,6 @@ export default function RecetaScreen() {
               { showAdd[day.fecha] && (
                 <View style={[styles.addPanel,{ marginBottom: 12 }]}>
                   <View style={styles.addCard}>
-                    {/* Picker de clasificación (filtra recetas) */}
                     <Picker
                       selectedValue={selectedClass[day.fecha] ?? ""}
                       onValueChange={(v) => setSelectedClass(prev => ({ ...prev, [day.fecha]: v }))}
@@ -239,14 +241,12 @@ export default function RecetaScreen() {
                       {classifications.map(c => <Picker.Item key={c.CVE_CATEGORIA} label={c.NOMBRE} value={c.CVE_CATEGORIA} />)}
                     </Picker>
 
-                    {/* Picker de recetas filtrado por clasificación */}
                     <Picker selectedValue={selectedRecipe[day.fecha] ?? ""} onValueChange={(v) => setSelectedRecipe(prev => ({ ...prev, [day.fecha]: v }))}>
                       <Picker.Item label="Seleccionar receta" value="" />
                       {recipes
                         .filter(r => {
                           const sel = selectedClass[day.fecha];
                           if (!sel || sel === '') return true;
-                          // Si SelectRecetas.php no devuelve CVE_CATEGORIA, no se filtrará.
                           return r.CVE_CATEGORIA == sel || r.cve_categoria == sel || r.CVE_CATEGORIA === sel;
                         })
                         .map(r => <Picker.Item key={r.CVE_RECETA} label={`${r.NOMBRE}`} value={r.CVE_RECETA} />)}
@@ -268,7 +268,7 @@ export default function RecetaScreen() {
                   <View style={styles.EmptyCard}><Text style={styles.emptyText}>Sin recetas</Text></View>
                 ) : day.items.map(item => (
                   <View key={item.CVE_AGENDA} style={styles.Card}>
-                    <TouchableOpacity onPress={() => navigation.navigate('InfoComidas', { data: { idReceta: item.CVE_RECETA, nombreRecetas: item.NOMBRE, calorias: item.CALORIAS, tamano: item.TAMANO, dificultad: item.DIFICULTAD, imagen: item.imagen } })}>
+                    <TouchableOpacity onPress={() => navigation.navigate("InfoComidas", { cve: item.idReceta })}>
                       <Image style={styles.ImgRecetas} source={{ uri: item.imagen }} />
                     </TouchableOpacity>
                     <View style={styles.CardInfo}>
@@ -294,7 +294,6 @@ export default function RecetaScreen() {
           ))}
         </View>
 
-        {/* RESUMEN SEMANAL: lista de ingredientes usados esa semana */}
         <View style={{ width: '95%', marginTop: 16, marginLeft:10, padding: 12, backgroundColor: '#fff', borderRadius: 12 }}>
           <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Resumen de ingredientes (semana)</Text>
           {weeklyTotals.length === 0 ? (
@@ -341,8 +340,8 @@ const styles = StyleSheet.create({
   DiaHeader:{ paddingHorizontal:20, marginBottom:8 },
   DiaHeaderRow:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' },
   DiaTitulo:{ color:"white", fontWeight:"bold", fontSize:16 },
-  Card:{ width:200, marginLeft:20, backgroundColor:"#EDEDED", borderRadius:16, overflow:'hidden' },
-  ImgRecetas:{ width: '100%', height:160, resizeMode:'cover' },
+  Card:{ width:180, marginLeft:20, backgroundColor:"#EDEDED", borderRadius:16, overflow:'hidden' },
+  ImgRecetas:{ width: '100%', height:120, resizeMode:'cover' },
   CardInfo:{ padding:8 },
   infoTitulo:{ fontSize:14, fontWeight:'bold' },
   infoContenido:{ flexDirection:'row', justifyContent:'space-between', marginTop:6 },
