@@ -20,7 +20,7 @@ if(empty($nombre) || empty($cantidad) || empty($costo) || empty($clasificacion) 
     exit;
 }
 
-$stmt2 = $conexion->prepare("INSERT INTO ingredientes (CVE_INGREDIENTE,NOMBRE,CANTIDAD,COSTO,CLASIFICACION,UNIDAD) VALUES ('','$nombre','$cantidad','$costo','$clasificacion','$unidad')");
+$stmt2 = $conexion->prepare("INSERT INTO ingredientes (NOMBRE,CANTIDAD,COSTO,CLASIFICACION,UNIDAD) VALUES ('$nombre','$cantidad','$costo','$clasificacion','$unidad')");
 
 if($stmt2->execute()){
     echo json_encode(['estado' => 1]);
