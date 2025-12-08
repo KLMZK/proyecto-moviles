@@ -32,7 +32,8 @@ if (!file_exists($perfil_dir)) {
 $rutaImagen = "";  
 
 if (isset($_FILES["imagen"])) {
-    $nombre_archivo = $nombre."_" . $id . ".jpg";
+    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $nombre);
+    $nombre_archivo = $nombre_limpio."_" . $id . ".jpg";
     $guardar_en = $perfil_dir . $nombre_archivo;
 
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {

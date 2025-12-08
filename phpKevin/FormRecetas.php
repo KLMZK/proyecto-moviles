@@ -2,7 +2,6 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -11,96 +10,72 @@ header("Content-Type: application/json; charset=UTF-8");
 session_start();
 include("conexion.php");
 
-$accion = $_POST["accion"] ?? "";
-$cve = isset($_POST['cve']) ? intval(trim($_POST['cve'])) : null;
-$idReceta = $cve;
-$nombre = $_POST['nombre'] ?? '';
-$clas = $_POST['clas'] ?? '';
+$nombre =$_POST['nombre'] ?? '';
+$clas =$_POST['clas'] ?? '';
 $instrucciones = json_decode($_POST['instrucciones'] ?? '[]', true);
 $ingrediente = json_decode($_POST['ingrediente'] ?? '[]', true);
+if (!is_array($ingrediente)) $ingrediente = [];
 $calorias = $_POST['calorias'] ?? '';
 $dificultad = $_POST['dificultad'] ?? '';
 $personas = $_POST['personas'] ?? '';
 $presupuesto = $_POST['presupuesto'] ?? '';
-
-$upload_dir = __DIR__ . "/uploads/";
-if (!file_exists($upload_dir)) mkdir($upload_dir, 0755, true);
-
-$response = ["ingreso" => 0];
-
-// Preparar instrucciones
-$texto = [];
-foreach ($instrucciones as $i => $paso) {
+$upload_dir = "uploads/";
+$instruccionesConPaso = [];
+foreach($instrucciones as $index => $paso) {
     $paso = trim($paso);
-    if ($paso !== "") {
-        $texto[] = "Paso " . ($i + 1) . ": " . $paso;
+    if($paso !== "") {
+        $instruccionesConPaso[] = "Paso ".($index+1).": $paso";
     }
 }
-$instruccionesTexto = implode("\n", $texto);
+$instruccionesTexto = implode("\n", $instruccionesConPaso);
 
-// ==========================================
-// EDITAR RECETA
-// ==========================================
-if ($accion === "editar" && $idReceta) {
 
-    // OBTENER NOMBRE ORIGINAL
-    $res = mysqli_query($conexion, "SELECT NOMBRE FROM recetas WHERE CVE_RECETA='$idReceta' LIMIT 1");
-    if ($row = mysqli_fetch_assoc($res)) {
-        $nombreO = $row['NOMBRE'];
-    } else {
-        echo json_encode(["ingreso" => 0, "error" => "Receta no encontrada"]);
-        exit();
-    }
+$sql = "INSERT INTO recetas (CVE_RECETA, NOMBRE, DESCRIPCION, CALORIAS, DIFICULTAD, TAMANO, PRESUPUESTO) 
+        VALUES ('','$nombre', '$instruccionesTexto', '$calorias', '$dificultad', '$personas', '$presupuesto')";
 
-    // Actualizar datos básicos
-    mysqli_query($conexion,
-        "UPDATE recetas SET 
-            NOMBRE='$nombre',
-            DESCRIPCION='$instruccionesTexto',
-            CALORIAS='$calorias',
-            DIFICULTAD='$dificultad',
-            TAMANO='$personas',
-            PRESUPUESTO='$presupuesto'
-         WHERE CVE_RECETA='$idReceta'"
-    );
+if (mysqli_query($conexion, $sql)) {
+    $idReceta = mysqli_insert_id($conexion);
+    mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas','$idReceta')");
 
-    // Categoría
-    if (!empty($clas)) {
-        mysqli_query($conexion, "DELETE FROM pertenece WHERE CVE_RECETA='$idReceta'");
-        mysqli_query($conexion, "INSERT INTO pertenece (CVE_CATEGORIA, CVE_RECETA) VALUES ('$clas', '$idReceta')");
-    }
+    foreach ($ingrediente as $ing) {
+        $cantidad = $ing['cantidad'] ?? 0;
+        $costo = $ing['costo'] ?? 0;
+        $unidad = $ing['unidad'] ?? '';
+        $clasificacion = $ing['clasificacion'] ?? '';
 
-    // Ingredientes
-    if (!empty($ingrediente) && $ingrediente !== "__NO_CAMBIAR__") {
-        mysqli_query($conexion, "DELETE FROM utiliza WHERE CVE_RECETA='$idReceta'");
-        foreach ($ingrediente as $ing) {
-            $idIng = $ing["cve_ingrediente"];
-            $cant = $ing["cantidad"];
-            mysqli_query($conexion, "INSERT INTO utiliza (CVE_INGREDIENTE, CVE_RECETA, CANTIDAD) VALUES ('$idIng', '$idReceta', '$cant')");
+        if (!empty($ing['cve_ingrediente'])) {
+            $idIngr = $conexion->real_escape_string($ing['cve_ingrediente']);
+        } else {
+            $nomIngr = $conexion->real_escape_string($ing['ingrediente'] ?? '');
+            mysqli_query($conexion, "INSERT INTO ingredientes (CVE_INGREDIENTE, NOMBRE, CANTIDAD, COSTO, CLASIFICACION, UNIDAD)
+                                 VALUES ('', '$nomIngr', '', '$costo', '$clasificacion', '$unidad')");
+            $idIngr = mysqli_insert_id($conexion);
         }
-    }
-
-    // Imagen
-    $imagen = $_FILES['imagen'] ?? null;
-    $nombreArchivoViejo = "{$nombreO}_{$idReceta}.jpg";
-    $rutaVieja = $upload_dir . $nombreArchivoViejo;
-    $nombreArchivoNuevo = "{$nombre}_{$idReceta}.jpg";
-    $rutaNueva = $upload_dir . $nombreArchivoNuevo;
-
-    if ($nombre !== $nombreO && (!$imagen || empty($imagen['tmp_name']))) {
-        if (file_exists($rutaVieja)) rename($rutaVieja, $rutaNueva);
-    } elseif ($imagen && isset($imagen['tmp_name']) && is_uploaded_file($imagen['tmp_name'])) {
-        if (file_exists($rutaVieja)) unlink($rutaVieja);
-        if (!move_uploaded_file($imagen['tmp_name'], $rutaNueva)) {
-            echo json_encode(["ingreso" => 0, "error" => "Error al subir la imagen"]);
-            exit();
-        }
-    }
-
-    $response["ingreso"] = 1;
-    $response["cveReceta"] = $idReceta;
+        mysqli_query($conexion, "INSERT INTO utiliza (CVE_INGREDIENTE, CVE_RECETA, CANTIDAD)
+                                 VALUES ('$idIngr', '$idReceta', '$cantidad')");
+     }
+ 
+     echo json_encode(["ingreso" => 1]);
+} else {
+    echo json_encode(["ingreso" => 0]);
 }
 
-echo json_encode($response);
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0755, true); 
+}
+
+$rutaImagen = "";  
+
+if (isset($_FILES["imagen"])) {
+    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $nombre);
+    $nombre_archivo = $nombre_limpio."_" . $idReceta . ".jpg";
+    $guardar_en = $upload_dir . $nombre_archivo;
+
+    if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $guardar_en)) {
+        chmod($guardar_en, 0644);
+        $rutaImagen = $guardar_en;
+    }
+}
+
 $conexion->close();
 ?>

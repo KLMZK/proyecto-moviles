@@ -7,12 +7,11 @@ header("Content-Type: application/json; charset=UTF-8");
 session_start();
 include("conexion.php");
 
-$nombre = $_POST['nombre'] ?? '';
-$id = $_POST['id'] ?? '';
-$imagen = $_FILES['imagen'] ?? null;
+$nombre =$_POST['nombre'] ?? '';
+$imagen= $_FILES['imagen']?? null;
+$id = $_POST['id'];
 
 $consulta = $conexion->query("SELECT NOMBRE FROM usuarios WHERE CVE_USUARIO = $id");
-
 if ($fila = $consulta->fetch_assoc()) {
     $nombreO = $fila['NOMBRE'];
 } else {
@@ -20,30 +19,18 @@ if ($fila = $consulta->fetch_assoc()) {
     exit();
 }
 
+$nombreArchivoNuevo = "{$nombre}_{$id}.jpg";
+$rutaNueva = __DIR__ . '/perfil/' . $nombreArchivoNuevo;
+
 $nombreArchivoViejo = "{$nombreO}_{$id}.jpg";
 $rutaVieja = __DIR__ . "/perfil/" . $nombreArchivoViejo;
 
-$nombreArchivoNuevo = "{$nombre}_{$id}.jpg";
-$rutaNueva = __DIR__ . "/perfil/" . $nombreArchivoNuevo;
 
-
-if ($nombre !== $nombreO) {
-
-    if (!$imagen || empty($imagen['tmp_name'])) {
-
-        if (file_exists($rutaVieja)) {
-            rename($rutaVieja, $rutaNueva);
-        }
-
-    } else {
-        if (file_exists($rutaVieja)) {
-            unlink($rutaVieja);
-        }
-    }
+if ($nombreO !== $nombre && file_exists($rutaVieja)) {
+    unlink($rutaVieja);
 }
 
 if ($imagen && isset($imagen['tmp_name']) && is_uploaded_file($imagen['tmp_name'])) {
-
     if (!move_uploaded_file($imagen['tmp_name'], $rutaNueva)) {
         echo json_encode(["ingreso" => 0, "error" => "Error al subir la imagen"]);
         exit();
@@ -51,7 +38,6 @@ if ($imagen && isset($imagen['tmp_name']) && is_uploaded_file($imagen['tmp_name'
 }
 
 $sql = "UPDATE usuarios SET NOMBRE='$nombre' WHERE CVE_USUARIO=$id";
-
 if ($conexion->query($sql)) {
     echo json_encode(["ingreso" => 1]);
 } else {
