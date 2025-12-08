@@ -210,6 +210,7 @@ function enviar() {
                 <Picker.Item label="Bebidas" value="4" />
                 <Picker.Item label="Postres" value="5" />
                 <Picker.Item label="Snacks" value="6" />
+                <Picker.Item label="Favoritos" value="7" />
               </Picker>
 
               <Text style={styles.TitInput}>Instrucciones:</Text>
