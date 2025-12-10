@@ -21,8 +21,7 @@ while($row = $result->fetch_assoc()){
     $receta['TAMANO'] = $row['TAMANO'];
     $receta['DIFICULTAD'] = $row['DIFICULTAD'];
     $receta['DESCRIPCION'] = $row['DESCRIPCION'];
-    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $row["NOMBRE"]);
-    $receta['IMAGEN'] = "http://".$ip."/moviles/uploads/".$nombre_limpio."_".$row["CVE_RECETA"].".jpg";
+    $receta['IMAGEN'] = "http://".$ip."/moviles/uploads/".$row["NOMBRE"]."_".$row["CVE_RECETA"].".jpg";
 
         if($row['NOMBREING'] != null){
         $receta['INGREDIENTES'][] = [

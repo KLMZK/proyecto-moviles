@@ -38,8 +38,7 @@ $res = $stmt->get_result();
 $rows = [];
 while ($row = $res->fetch_assoc()) {
     // construir imagen
-    $nombre_limpio = preg_replace('/[^A-Za-z0-9]/', '', $row["NOMBRE"]);
-    $nombre_archivo = $nombre_limpio . '_' . $row["idReceta"] . ".jpg";
+    $nombre_archivo = $row["NOMBRE"]. '_' . $row["idReceta"] . ".jpg";
     $imagen_url = $base_url . $nombre_archivo;
     $row['imagen'] = $imagen_url;
 
